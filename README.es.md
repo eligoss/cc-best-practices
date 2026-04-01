@@ -988,9 +988,9 @@ Mejores casos de uso: revisión de código en paralelo (revisores de seguridad +
 
 ## 14. Gestión de la Ventana de Contexto
 
-Incluso con una ventana de contexto de 1M — y especialmente al usar subagentes que mantienen limpia la sesión principal — vale la pena ser intencional sobre qué está en contexto. Una sesión enfocada con 200K de contexto relevante supera a una sesión saturada con 800K de ruido acumulado.
+Puede que este sea el consejo operativo más importante de esta guía: **Claude rinde mejor cuando la ventana de contexto está por debajo de 200K tokens.** No 500K, no 1M — por debajo de 200K. Sí, la ventana *soporta* 1M, pero la calidad se degrada a medida que se llena. Piénsalo como la RAM: tu ordenador tiene 64 GB, pero si estás usando 60 GB, todo va más lento.
 
-Dicho esto, la ventana de 1M más la delegación a subagentes significa que la gestión del contexto es menos una crisis de lo que solía ser. Estos son buenos hábitos, no técnicas de supervivencia.
+Esto tiene una consecuencia práctica directa: **compact y continuar es casi siempre mejor que empezar una nueva sesión** para trabajo similar. Cuando ejecutas `/compact`, Claude conserva las decisiones clave y el contexto mientras elimina el ruido. Una sesión compactada con 50K de contexto enfocado supera a una sesión nueva donde Claude tiene que releer todo desde cero — y *supera con creces* a una sesión saturada en 500K donde las instrucciones importantes están enterradas entre salidas antiguas de herramientas.
 
 ### Los comandos clave
 
@@ -1003,9 +1003,24 @@ Dicho esto, la ventana de 1M más la delegación a subagentes significa que la g
 | `/context` | Muestra el desglose de tokens por categoría | Diagnosticar qué está consumiendo tu contexto |
 | `Ctrl+B` | Pone en segundo plano un subagente en ejecución | Cuando un subagente tarda mucho y quieres hacer otra cosa |
 
+### Compact vs clear vs nueva sesión
+
+Esta es una decisión que tomarás decenas de veces. Esta es la regla:
+
+| Situación | Mejor acción | Por qué |
+|-----------|-------------|---------|
+| Cambiando a trabajo **no relacionado** | `/clear` | El contexto antiguo es ruido puro para la nueva tarea |
+| Continuando trabajo **similar** después de terminar una parte | `/compact` | Conserva las decisiones, elimina las salidas de herramientas |
+| La sesión se siente lenta o Claude olvida instrucciones | `/compact` con guía | Resetea el ruido conservando lo que importa |
+| Empezando un **proyecto completamente diferente** | Nueva sesión | Diferente CLAUDE.md, diferente proyecto Serena, todo diferente |
+
+La clave: **`/compact` + continuar supera a una nueva sesión** cuando el trabajo está relacionado. Una sesión compactada retiene tus decisiones arquitectónicas, patrones acordados y progreso de tareas. Una sesión nueva empieza en frío y tiene que redescubrir todo eso.
+
 ### Hábitos prácticos
 
-**Usa `/clear` agresivamente.** Mezclar tareas no relacionadas en una sesión es el mayor desperdicio de contexto. ¿Terminaste de depurar ese endpoint de API? `/clear` antes de empezar el trabajo de frontend. El coste de releer unos pocos archivos no es nada comparado con cargar 100K de contexto de depuración irrelevante.
+**Usa `/clear` agresivamente entre tareas no relacionadas.** ¿Terminaste de depurar ese endpoint de API? `/clear` antes de empezar el trabajo de frontend. El coste de releer unos pocos archivos no es nada comparado con cargar 100K de contexto de depuración irrelevante.
+
+**Compacta de forma proactiva, no reactiva.** No esperes a que Claude empiece a confundirse. Después de completar un paso importante, `/compact` para mantener el contexto ligero. Piénsalo como limpiar tu mesa entre tareas — un pequeño hábito que se acumula.
 
 **Las instrucciones personalizadas de `/compact` funcionan.** En lugar de solo `/compact`, prueba:
 
@@ -1033,7 +1048,9 @@ Si una instrucción que le diste a Claude desapareció después de la compactaci
 
 ## 15. Git Worktrees — Sesiones en Paralelo
 
-Esta es una de las técnicas de productividad más potentes: ejecutar múltiples sesiones de Claude en el mismo repositorio sin que se pisen mutuamente los archivos.
+Claude Code está *diseñado* para el paralelismo. No es algo añadido a posteriori — es un principio arquitectónico central. Los subagentes se ejecutan en paralelo dentro de una sesión. Múltiples sesiones se ejecutan en paralelo entre worktrees. Y puedes combinar ambos: una sesión principal orquestando subagentes mientras otras sesiones trabajan de forma independiente en sus propios worktrees.
+
+Cuando interiorices esto, dejas de pensar en Claude como "un asistente haciendo una cosa" y empiezas a verlo como "un equipo que puedo desplegar por todo mi codebase."
 
 ### La idea
 
@@ -1053,6 +1070,16 @@ Esto crea `.claude/worktrees/feature-auth/` con una rama dedicada.
 ### El patrón del usuario avanzado
 
 Los equipos de alto rendimiento ejecutan 5-15 sesiones de Claude simultáneamente — algunas en pestañas de terminal, otras en la app web — cada una en su propio worktree. Frontend en una, backend en otra, tests en una tercera. Todas trabajan en paralelo sin conflictos, y cada sesión abre su propio PR cuando termina.
+
+### Dos niveles de paralelismo
+
+Piénsalo como dos estrategias complementarias:
+
+**Dentro de una sesión — subagentes.** Claude despacha subagentes Haiku/Sonnet/Opus para manejar subtareas en paralelo. Investiga tres enfoques simultáneamente. Ejecuta code review y tests al mismo tiempo. Explora el codebase en un subagente mientras planificas en otro. Esto mantiene limpio el contexto de tu sesión principal mientras el trabajo avanza más rápido.
+
+**Entre sesiones — worktrees.** Múltiples sesiones completas de Claude, cada una en su propio worktree, trabajando en tareas independientes. Así es como se paraleliza a nivel de feature — autenticación en una sesión, endpoints de API en otra, migraciones de base de datos en una tercera.
+
+La combinación es donde está el verdadero poder. Cada sesión de worktree puede *ella misma* despachar subagentes. Terminas con un árbol de trabajo paralelo que a un equipo humano le llevaría días coordinar.
 
 ### Consejos de configuración
 

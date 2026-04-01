@@ -988,9 +988,9 @@ Best use cases: parallel code review (security + performance + test reviewers), 
 
 ## 14. Context Window Management
 
-Even with a 1M context window — and especially when using subagents that keep the main session clean — it pays to be intentional about what's in context. A focused session with 200K of relevant context outperforms a bloated session with 800K of accumulated noise.
+This might be the most important operational insight in this guide: **Claude performs best when the context window is under 200K tokens.** Not 500K, not 1M — under 200K. Yes, the window *supports* 1M, but quality degrades as it fills. Think of it like RAM: your computer has 64 GB, but if you're using 60 GB, everything slows down.
 
-That said, the 1M window plus subagent delegation means context management is less of a crisis than it used to be. These are good habits, not survival techniques.
+This has a direct practical consequence: **compact and continue is almost always better than starting a new session** for similar work. When you `/compact`, Claude preserves the key decisions and context while shedding the noise. A compacted session with 50K of focused context outperforms a fresh session where Claude has to re-read everything from scratch — and it *far* outperforms a bloated session at 500K where important instructions are buried in old tool outputs.
 
 ### The key commands
 
@@ -1003,9 +1003,24 @@ That said, the 1M window plus subagent delegation means context management is le
 | `/context` | Shows per-category token breakdown | Diagnosing what's eating your context |
 | `Ctrl+B` | Background a running subagent | When a subagent is taking long and you want to do something else |
 
+### Compact vs clear vs new session
+
+This is a decision you'll make dozens of times. Here's the rule:
+
+| Situation | Best Action | Why |
+|-----------|------------|-----|
+| Switching to **unrelated** work | `/clear` | Old context is pure noise for the new task |
+| Continuing **similar** work after a chunk is done | `/compact` | Keep the decisions, shed the tool outputs |
+| Session feels sluggish or Claude forgets instructions | `/compact` with guidance | Reset the noise while preserving what matters |
+| Starting a completely **different project** | New session | Different CLAUDE.md, different Serena project, different everything |
+
+The key insight: **`/compact` + continue beats a new session** when the work is related. A compacted session retains your architectural decisions, agreed-upon patterns, and task progress. A new session starts cold and has to rediscover all of that.
+
 ### Practical habits
 
-**Use `/clear` aggressively.** Mixing unrelated tasks in one session is the #1 context waste. Finished debugging that API endpoint? `/clear` before starting the frontend work. The cost of re-reading a few files is nothing compared to carrying 100K of irrelevant debugging context.
+**Use `/clear` aggressively between unrelated tasks.** Finished debugging that API endpoint? `/clear` before starting the frontend work. The cost of re-reading a few files is nothing compared to carrying 100K of irrelevant debugging context.
+
+**Compact proactively, not reactively.** Don't wait until Claude starts getting confused. After completing a major step, `/compact` to keep context lean. Think of it as clearing your desk between tasks — a small habit that compounds.
 
 **Custom `/compact` instructions work.** Instead of just `/compact`, try:
 
@@ -1033,7 +1048,9 @@ If an instruction you gave Claude disappeared after compaction, it was only in c
 
 ## 15. Git Worktrees — Parallel Sessions
 
-This is one of the most powerful productivity techniques: running multiple Claude sessions on the same repository without them stepping on each other's files.
+Claude Code is *designed* for parallelism. It's not an afterthought — it's a core architectural principle. Subagents run in parallel within a session. Multiple sessions run in parallel across worktrees. And you can mix both: a main session orchestrating subagents while other sessions work independently in their own worktrees.
+
+Once you internalize this, you stop thinking of Claude as "one assistant doing one thing" and start thinking of it as "a team I can deploy across my codebase."
 
 ### The idea
 
@@ -1053,6 +1070,16 @@ This creates `.claude/worktrees/feature-auth/` with a dedicated branch.
 ### The power-user pattern
 
 High-output teams run 5-15 Claude sessions simultaneously — some in terminal tabs, some in the web app — each in its own worktree. Frontend in one, backend in another, tests in a third. They all work in parallel without conflicts, and each session opens its own PR when done.
+
+### Two levels of parallelism
+
+Think of it as two complementary strategies:
+
+**Within a session — subagents.** Claude dispatches Haiku/Sonnet/Opus subagents to handle subtasks in parallel. Research three approaches simultaneously. Run code review and tests at the same time. Explore the codebase in one subagent while planning in another. This keeps your main session's context clean while getting work done faster.
+
+**Across sessions — worktrees.** Multiple full Claude sessions, each in its own worktree, working on independent tasks. This is how you parallelize at the feature level — authentication in one session, API endpoints in another, database migrations in a third.
+
+The combination is where the real power is. Each worktree session can *itself* dispatch subagents. You end up with a tree of parallel work that would take a human team days to coordinate.
 
 ### Setup tips
 
