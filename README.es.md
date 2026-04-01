@@ -26,10 +26,10 @@ Empezaremos con los bloques fundamentales — plugins, servidores MCP y comandos
 | 10 | [Context7](#10-context7--documentación-actualizada-de-verdad) | Documentación de librerías en tiempo real, porque tus datos de entrenamiento ya están desactualizados |
 | 11 | [Hooks y Guardarraíles](#11-hooks-y-guardarraíles--automatiza-y-protege) | Automatización de sesiones, hooks de seguridad y git hooks trabajando juntos |
 | 12 | [Permisos y Seguridad](#12-permisos-y-seguridad) | Deja que Claude vaya rápido sin que pueda hacer nada peligroso |
-| 13 | [Subagentes y Equipos de Agentes](#13-subagentes-y-equipos-de-agentes) | Agentes personalizados, niveles de modelos y coordinación multi-agente |
-| 14 | [Gestión de la Ventana de Contexto](#14-gestión-de-la-ventana-de-contexto) | `/compact`, `/clear`, `/btw` y mantener las sesiones enfocadas |
+| 13 | [Subagentes y Equipos de Agentes](#13-subagentes-y-equipos-de-agentes) | El modelo de orquestación, agentes personalizados, niveles de modelos y coordinación multi-agente |
+| 14 | [Gestión de la Ventana de Contexto](#14-gestión-de-la-ventana-de-contexto) | `/compact`, `/clear`, `/btw`, higiene del contexto y mantener las sesiones enfocadas |
 | 15 | [Git Worktrees](#15-git-worktrees--sesiones-en-paralelo) | Ejecuta múltiples sesiones de Claude en el mismo repo sin conflictos |
-| 16 | [Git y Code Review](#16-git-y-code-review) | Commits convencionales, CodeRabbit y revisiones locales con subagentes |
+| 16 | [Git y Code Review](#16-git-y-code-review) | Commits convencionales, verificación por paso, CodeRabbit y revisiones locales con subagentes |
 | 17 | [Gestión de Sesiones](#17-gestión-de-sesiones) | Retoma, renombra y navega sesiones como un profesional |
 | 18 | [Línea de Estado](#18-línea-de-estado--ve-qué-está-pasando) | Uso de contexto, coste y estadísticas de sesión en tiempo real de un vistazo |
 | 19 | [Seguimiento de Tareas](#19-seguimiento-de-tareas--no-pierdas-el-hilo) | Por qué las tareas en sesión importan más de lo que crees |
@@ -548,15 +548,21 @@ Añade esto a tu CLAUDE.md global. En serio, simplemente pégala:
 | Encontrar un símbolo/clase/función | Serena `find_symbol` | Semántica, consciente del lenguaje |
 | Entender la estructura de un archivo | Serena `get_symbols_overview` | Eficiente en tokens — solo el esquema |
 | Comprobar referencias antes de cambiar algo | Serena `find_referencing_symbols` | Completa — detecta cada uso |
+| Leer un archivo conocido | `Read` | Directa, sin sobrecarga — usa Serena solo cuando necesites la estructura |
 | Buscar literales de cadena, valores de config, mensajes de error | `Grep` (ripgrep) | Patrones de texto que no son símbolos de código |
 | Buscar archivos no-código (markdown, JSON, YAML) | `Grep` (ripgrep) | Serena solo indexa código |
 | Encontrar archivos por nombre o patrón | `Glob` | Más rápido que cualquier búsqueda para descubrir archivos |
-| Editar el cuerpo de una función/método | Serena `replace_symbol_body` | Reemplazo preciso a nivel de símbolo |
-| Editar configuración o archivos no-código | `Edit` | Edición de texto estándar |
+| Reemplazar el cuerpo de una función/método | Serena `replace_symbol_body` | Reemplazo preciso a nivel de símbolo |
+| Corrección puntual de código (ajuste a nivel de línea) | `Edit` | Más rápido que Serena para cambios quirúrgicos |
+| Editar configuración o archivos no-código | `Edit` | Serena no maneja archivos no-código |
+| Errores de tipos y diagnósticos | TypeScript LSP / Swift LSP | Verificación de tipos en tiempo real sin compilación completa |
+| Renombrar en todo el codebase | Serena `rename_symbol` | Renombrado semántico, no sustitución de texto |
 | Consultar la API actual de una librería | Context7 | Documentación en tiempo real — los datos de entrenamiento pueden estar desactualizados |
+| Ejecutar compilación, tests, lint | `Bash` | Comandos de verificación y scripts |
 | Recordar una decisión o patrón pasado | Graphiti `search_memory_facts` | Grafo de conocimiento multi-sesión |
+| Datos rápidos del proyecto (IDs, claves, estado) | MEMORY.md | Ya está en contexto — no hace falta llamar a ninguna herramienta |
 
-**La regla general:** Serena para símbolos de código. Grep para texto y no-código. Glob para archivos. Context7 para documentación. Graphiti para memoria.
+**La regla general:** Serena para símbolos de código. Grep para texto y no-código. Glob para archivos. Context7 para documentación. Graphiti para memoria. LSP para verificación de tipos. Read/Edit para trabajo directo con archivos.
 
 ### Por qué esto importa más de lo que crees
 
@@ -910,22 +916,37 @@ Esto significa que Claude solo se detendrá a preguntar cuando encuentre algo ex
 
 Claude Code puede lanzar instancias más pequeñas de Claude para manejar subtareas. Esta es una de las funcionalidades más potentes una vez que vas más allá de los valores por defecto.
 
-### Selección de modelo: el cerebro adecuado para el trabajo
+### El modelo de orquestación
 
-| Modelo | Mejor Para | El Trade-off |
-|--------|-----------|-------------|
-| **Haiku** | Búsqueda de archivos, consultas rápidas, exploración | Rápido y barato — pero puede perder matices |
-| **Sonnet** | Implementación, tests, code review, QA estándar | Mejor equilibrio — tu herramienta diaria |
-| **Opus** | Decisiones de arquitectura, código crítico de seguridad, refactorizaciones complejas | Razonamiento más profundo — vale la pena para trabajo de alto riesgo |
+La forma más efectiva de usar Claude Code es pensar en tu sesión principal como un **orquestador** — planifica, delega, valida y revisa. El trabajo real de implementación se delega a subagentes.
+
+Esto no es solo un buen modelo mental — es cómo están estructuradas las mejores configuraciones:
+
+| Rol | Modelo | Cuándo Usarlo |
+|-----|-------|--------------|
+| **Orquestador** (sesión principal) | `opus` | Siempre — planificación, revisión, validación, coordinación |
+| **Agente de implementación** | `sonnet` | Escribir código, tests, refactorizaciones estándar |
+| **Agente de exploración** | `haiku` | Búsqueda amplia del codebase, consultas rápidas, descubrimiento de archivos |
+| **Subagente crítico** | `opus` | Cuando la complejidad o el impacto exigen hacerlo bien |
 
 Añade esto a tu CLAUDE.md global:
 
 ```markdown
-## Subagents
+## Orchestration Model
+Main session = orchestrator (plans, delegates, validates, reviews)
 - haiku — exploration, quick lookups
 - sonnet — implementation, tests, code review, standard QA
 - opus — architecture, security-critical, complex refactors
 ```
+
+### Reglas de subagentes que dan resultados
+
+Estas reglas previenen los fallos más comunes de los subagentes:
+
+- **Paralelo por defecto.** Para tareas que tocan 5 o más archivos independientes, lanza subagentes en paralelo (5-8 archivos cada uno). El procesamiento secuencial de tareas grandes garantiza la degradación del contexto en el orquestador.
+- **Conscientes de las herramientas.** Los subagentes siguen las mismas reglas de selección de herramientas que la sesión principal — Serena para código, Grep para texto, etc. No dejes que recurran por defecto a leer archivos completos.
+- **Autoverificación.** Los subagentes deben compilar, verificar tipos, pasar el lint y ejecutar los tests relevantes antes de informar que han terminado. "Compila" no es evidencia de verificación.
+- **El orquestador comprueba dos veces.** La sesión principal revisa los resultados del subagente de forma independiente antes de aceptarlos. Confía, pero verifica.
 
 ### Definiciones de subagentes personalizados
 
@@ -1034,6 +1055,15 @@ Esto guía qué sobrevive a la compresión. Útil cuando estás a punto de cambi
 **`/btw` para consultas rápidas.** ¿Necesitas comprobar la firma de una función o un valor de configuración pero no quieres que ensucie tu conversación? `/btw what's the return type of getUserById?` — la respuesta aparece en un overlay descartable, nunca entra en el historial.
 
 **Los subagentes son tu mejor defensa de contexto.** Delega trabajo exploratorio a subagentes. Se ejecutan en su propio contexto, devuelven solo la respuesta y mantienen limpia tu sesión principal. "Usa un subagente para investigar los fallos de test en el módulo de auth" es mejor que investigar directamente y llenar tu sesión con 50 lecturas de archivos.
+
+### Higiene del contexto — hábitos defensivos
+
+Estos son los asesinos silenciosos de las sesiones largas. Ninguno produce errores obvios — las cosas simplemente van empeorando poco a poco:
+
+- **Vuelve a leer antes de editar tras trabajo significativo.** La autocompactación descarta lecturas previas de archivos. Si has hecho 20 llamadas a herramientas desde la última vez que leíste un archivo, Claude podría estar editando con contexto obsoleto. La solución es sencilla: vuelve a leer, luego edita.
+- **Los archivos grandes necesitan lecturas por fragmentos.** Cada llamada a `Read` devuelve máximo 2.000 líneas. Para archivos que se acercan a ese límite, usa los parámetros `offset` y `limit`. Nunca asumas que una sola lectura lo capturó todo.
+- **Vigila los resultados de herramientas truncados.** Los resultados de búsqueda grandes se truncan silenciosamente. Si una búsqueda devuelve sorprendentemente pocos resultados, vuelve a ejecutarla con un ámbito más reducido — directorio específico, patrón glob más estricto.
+- **Límite de 500 líneas por archivo.** Los archivos que superan las 500 líneas son difíciles de manejar eficientemente para Claude. Si un archivo crece más allá de esto, divídelo — una clase o módulo por archivo es un buen criterio por defecto.
 
 ### Qué sobrevive a la compactación
 
@@ -1165,6 +1195,16 @@ También puedes activarlo manualmente:
 O define un agente de revisión personalizado (ver [Sección 13](#13-subagentes-y-equipos-de-agentes)) que acumule conocimiento sobre tu codebase con el tiempo.
 
 **¿Por qué ambos?** Las revisiones locales son rápidas y contextuales — conocen el plan y detectan desviaciones inmediatamente. Las revisiones de CodeRabbit son frescas e independientes — detectan issues que el sesgo de sesión pasaría por alto. Juntos, dan defensa en profundidad.
+
+### Verificación: por paso, no solo al final
+
+No esperes hasta el PR para verificar. Después de cada paso lógico:
+
+1. **Compilar / verificar tipos** (p. ej., `tsc --noEmit`, `xcodebuild`)
+2. **Lint** (p. ej., `eslint . --quiet`, `swiftlint`)
+3. **Ejecutar los tests unitarios relevantes**
+
+Esto también aplica a los subagentes — deben verificar antes de informar que han terminado (ver [Sección 13](#13-subagentes-y-equipos-de-agentes)). Antes de crear un PR, ejecuta la suite completa de tests. Añade los comandos de verificación de tu proyecto a su CLAUDE.md para que Claude siempre sepa cómo comprobar su propio trabajo.
 
 ---
 

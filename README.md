@@ -26,10 +26,10 @@ We'll start with the building blocks — plugins, MCP servers, and commands — 
 | 10 | [Context7](#10-context7--docs-that-are-actually-current) | Live library documentation because your training data is already stale |
 | 11 | [Hooks and Guardrails](#11-hooks-and-guardrails--automate-and-protect) | Session automation, security hooks, and git hooks working together |
 | 12 | [Permissions and Security](#12-permissions-and-security) | Let Claude move fast without letting it do anything dangerous |
-| 13 | [Subagents and Agent Teams](#13-subagents-and-agent-teams) | Custom agents, model tiers, and multi-agent coordination |
-| 14 | [Context Window Management](#14-context-window-management) | `/compact`, `/clear`, `/btw`, and keeping sessions focused |
+| 13 | [Subagents and Agent Teams](#13-subagents-and-agent-teams) | The orchestration model, custom agents, model tiers, and multi-agent coordination |
+| 14 | [Context Window Management](#14-context-window-management) | `/compact`, `/clear`, `/btw`, context hygiene, and keeping sessions focused |
 | 15 | [Git Worktrees](#15-git-worktrees--parallel-sessions) | Run multiple Claude sessions on the same repo without conflicts |
-| 16 | [Git and Code Review](#16-git-and-code-review) | Conventional commits, CodeRabbit, and local subagent reviews |
+| 16 | [Git and Code Review](#16-git-and-code-review) | Conventional commits, per-step verification, CodeRabbit, and local subagent reviews |
 | 17 | [Session Management](#17-session-management) | Resume, rename, and navigate sessions like a pro |
 | 18 | [Status Line](#18-status-line--see-whats-happening) | Real-time context usage, cost, and session stats at a glance |
 | 19 | [Task Tracking](#19-task-tracking--dont-lose-your-place) | Why in-session tasks matter more than you think |
@@ -548,15 +548,21 @@ Add this to your global CLAUDE.md. Seriously, just paste it in:
 | Find a symbol/class/function | Serena `find_symbol` | Semantic, language-aware |
 | Understand file structure | Serena `get_symbols_overview` | Token-efficient — just the outline |
 | Check references before changing something | Serena `find_referencing_symbols` | Complete — catches every usage |
+| Read a known file | `Read` | Direct, no overhead — use Serena only when you need structure |
 | Search string literals, config values, error messages | `Grep` (ripgrep) | Text patterns that aren't code symbols |
 | Search non-code files (markdown, JSON, YAML) | `Grep` (ripgrep) | Serena only indexes code |
 | Find files by name or pattern | `Glob` | Faster than any search for file discovery |
-| Edit a function/method body | Serena `replace_symbol_body` | Precise, symbol-level replacement |
-| Edit config or non-code files | `Edit` | Standard text editing |
+| Replace a function/method body | Serena `replace_symbol_body` | Precise, symbol-level replacement |
+| Small code fix (line-level tweak) | `Edit` | Faster than Serena for surgical changes |
+| Edit config or non-code files | `Edit` | Serena doesn't handle non-code |
+| Type errors and diagnostics | TypeScript LSP / Swift LSP | Real-time type checking without a full build |
+| Rename across codebase | Serena `rename_symbol` | Semantic rename, not text find-replace |
 | Look up a library's current API | Context7 | Real-time docs — training data may be stale |
+| Run build, test, lint | `Bash` | Verification commands and scripts |
 | Recall a past decision or pattern | Graphiti `search_memory_facts` | Cross-session knowledge graph |
+| Quick project facts (IDs, keys, status) | MEMORY.md | Already in context — no tool call needed |
 
-**The rule of thumb:** Serena for code symbols. Grep for text and non-code. Glob for files. Context7 for docs. Graphiti for memory.
+**The rule of thumb:** Serena for code symbols. Grep for text and non-code. Glob for files. Context7 for docs. Graphiti for memory. LSP for type checking. Read/Edit for direct file work.
 
 ### Why this matters more than you'd think
 
@@ -910,22 +916,37 @@ This means Claude will only stop to ask when it hits something explicitly denied
 
 Claude Code can spawn smaller Claude instances to handle subtasks. This is one of the most powerful features once you go beyond the defaults.
 
-### Model selection: the right brain for the job
+### The orchestration model
 
-| Model | Best For | The Trade-off |
-|-------|---------|---------------|
-| **Haiku** | File lookups, quick searches, exploration | Fast and cheap — but may miss nuance |
-| **Sonnet** | Implementation, tests, code review, standard QA | Best balance — your daily driver |
-| **Opus** | Architecture decisions, security-critical code, complex refactors | Deepest reasoning — worth it for high-stakes work |
+The most effective way to use Claude Code is to think of your main session as an **orchestrator** — it plans, delegates, validates, and reviews. The actual implementation work gets delegated to sub-agents.
+
+This isn't just a nice mental model — it's how the best configurations are structured:
+
+| Role | Model | Use When |
+|------|-------|----------|
+| **Orchestrator** (main session) | `opus` | Always — planning, review, validation, coordination |
+| **Implementation agent** | `sonnet` | Writing code, tests, standard refactors |
+| **Exploration agent** | `haiku` | Broad codebase search, quick lookups, file discovery |
+| **Critical sub-agent** | `opus` | When complexity or impact demands getting it right |
 
 Add this to your global CLAUDE.md:
 
 ```markdown
-## Subagents
+## Orchestration Model
+Main session = orchestrator (plans, delegates, validates, reviews)
 - haiku — exploration, quick lookups
 - sonnet — implementation, tests, code review, standard QA
 - opus — architecture, security-critical, complex refactors
 ```
+
+### Sub-agent rules that pay off
+
+These rules prevent the most common sub-agent failures:
+
+- **Parallel by default.** For tasks touching 5+ independent files, launch parallel sub-agents (5-8 files each). Sequential processing of large tasks guarantees context decay in the orchestrator.
+- **Tool-aware.** Sub-agents follow the same tool selection rules as the main session — Serena for code, Grep for text, etc. Don't let them default to reading entire files.
+- **Self-verifying.** Sub-agents must build, type-check, lint, and run relevant tests before reporting done. "It compiles" is not verification evidence.
+- **Orchestrator double-checks.** The main session reviews sub-agent results independently before accepting. Trust, but verify.
 
 ### Custom subagent definitions
 
@@ -1034,6 +1055,15 @@ This guides what survives compression. Useful when you're about to shift focus b
 **`/btw` for quick lookups.** Need to check a function signature or a config value but don't want it cluttering your conversation? `/btw what's the return type of getUserById?` — the answer appears in a dismissible overlay, never enters history.
 
 **Subagents are your best context defense.** Delegate exploratory work to subagents. They run in their own context, return just the answer, and keep your main session clean. "Use a subagent to investigate the test failures in the auth module" is better than investigating directly and filling your session with 50 file reads.
+
+### Context hygiene — defensive habits
+
+These are the silent killers of long sessions. None of them produce obvious errors — things just gradually get worse:
+
+- **Re-read before editing after significant work.** Auto-compaction discards earlier file reads. If you've done 20 tool calls since you last read a file, Claude may be editing against stale context. The fix is simple: re-read, then edit.
+- **Large files need chunked reads.** Each `Read` call returns max 2,000 lines. For files approaching that, use `offset` and `limit` parameters. Never assume a single read captured everything.
+- **Watch for truncated tool results.** Large search results get silently truncated. If a search returns suspiciously few results, re-run with a narrower scope — specific directory, stricter glob pattern.
+- **500-line file cap.** Files exceeding 500 lines are hard for Claude to work with efficiently. If you notice a file growing past this, split it — one class or module per file is a good default.
 
 ### What survives compaction
 
@@ -1165,6 +1195,16 @@ You can also trigger it manually:
 Or define a custom review agent (see [Section 13](#13-subagents-and-agent-teams)) that accumulates knowledge about your codebase over time.
 
 **Why both?** Local reviews are fast and contextual — they know the plan and catch deviations immediately. CodeRabbit reviews are fresh and independent — they catch issues that session bias would miss. Together, they give you defense in depth.
+
+### Verification: per-step, not just at the end
+
+Don't wait until the PR to verify. After each logical step:
+
+1. **Build / type-check** (e.g., `tsc --noEmit`, `xcodebuild`)
+2. **Lint** (e.g., `eslint . --quiet`, `swiftlint`)
+3. **Run relevant unit tests**
+
+This applies to sub-agents too — they should verify before reporting done (see [Section 13](#13-subagents-and-agent-teams)). Before creating a PR, run the full test suite. Add your project's verification commands to its CLAUDE.md so Claude always knows how to check its own work.
 
 ---
 
