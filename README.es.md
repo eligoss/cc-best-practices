@@ -1,6 +1,6 @@
-[English](README.md) | [Русский](README.ru.md) | [Українська](README.ua.md) | **Español**
-
 # Claude Code: Buenas Prácticas
+
+[English](README.md) | [Русский](README.ru.md) | [Українська](README.uk.md) | **Español**
 
 > **¿Para quién es esto?** Desarrolladores que ya usan Claude Code y quieren pasar de "funciona" a "esto es genuinamente 10 veces mejor." Tanto si llevas una semana usándolo como seis meses, aquí hay algo para ti.
 
@@ -94,7 +94,7 @@ Algunos de los más usados:
 
 Los slash commands son la forma de invocar skills desde plugins. Escribe `/` y verás lo que hay disponible:
 
-```
+```text
 /commit              Crea un git commit
 /code-review         Revisa un pull request
 /revise-claude-md    Actualiza CLAUDE.md con los aprendizajes de la sesión
@@ -238,7 +238,7 @@ Los skills resuelven esto. Son como secciones de CLAUDE.md que se cargan **bajo 
 
 Un skill es un archivo markdown con una descripción. Cuando Claude empieza una tarea, comprueba: "¿Algún skill coincide con lo que estoy a punto de hacer?" Si es así, carga el contenido de ese skill. Si no, se mantiene al margen.
 
-```
+```text
 Tú: Arregla el test inestable en UserService
 
 Claude: [ve que es una tarea de testing]
@@ -288,7 +288,7 @@ claude plugin install skill-creator@claude-plugins-official
 
 Luego simplemente cuéntale lo que sabes:
 
-```
+```text
 Tú: /skill-creator
 
 Claude: ¿Qué conocimiento quieres convertir en un skill?
@@ -357,7 +357,7 @@ Superpowers añade un conjunto de **skills de proceso** que se activan en funci�
 
 **Sin Superpowers**, una sesión típica se parece a esto:
 
-```
+```text
 Tú: Implementa autenticación de usuario con OAuth
 
 Claude: ¡Claro! Voy a crear el middleware de auth...
@@ -370,7 +370,7 @@ Claude: ¡Claro! Voy a crear el middleware de auth...
 
 **Con Superpowers:**
 
-```
+```text
 Tú: Implementa autenticación de usuario con OAuth
 
 Claude: [Brainstorming se activa]
@@ -469,7 +469,7 @@ At session start, call `activate_project("my-project")`.
 
 La forma más eficiente de explorar código con Serena sigue un patrón de **zoom-in**:
 
-```
+```text
 list_dir                → ¿Qué hay en este directorio?
 get_symbols_overview    → ¿Qué símbolos hay en este archivo? (sin cuerpos — solo nombres y firmas)
 find_symbol             → Muéstrame el cuerpo completo de esta función
@@ -478,7 +478,7 @@ find_referencing_symbols → ¿Quién usa esto? (antes de cambiarlo)
 
 Y para editar:
 
-```
+```text
 replace_symbol_body   → Reescribe el cuerpo de una función con precisión
 insert_before_symbol  → Añade algo encima de un símbolo
 insert_after_symbol   → Añade algo debajo de un símbolo
@@ -605,7 +605,7 @@ When using Graphiti tools, always use `group_id="my-project"`.
 ```
 
 **Inicio de sesión** — Claude carga contexto relevante:
-```
+```text
 search_memory_facts(
   query="architecture decisions patterns",
   group_ids=["my-project"]
@@ -613,7 +613,7 @@ search_memory_facts(
 ```
 
 **Fin de sesión** — Claude guarda lo que aprendió:
-```
+```text
 add_memory(
   group_id="my-project",
   content="Decided to use event sourcing for order processing
@@ -1006,7 +1006,7 @@ Dicho esto, la ventana de 1M más la delegación a subagentes significa que la g
 
 **Las instrucciones personalizadas de `/compact` funcionan.** En lugar de solo `/compact`, prueba:
 
-```
+```text
 /compact Keep the architectural decisions and test commands,
          summarize the debugging session
 ```
@@ -1059,7 +1059,7 @@ Los equipos de alto rendimiento ejecutan 5-15 sesiones de Claude simultáneament
 ```
 
 **Copia archivos env en nuevos worktrees** con `.worktreeinclude`:
-```
+```text
 # .worktreeinclude — archivos en gitignore que se copian en cada nuevo worktree
 .env.local
 .env.development
@@ -1109,7 +1109,7 @@ CodeRabbit revisa tus pull requests automáticamente en GitHub. Detecta issues d
 claude plugin install coderabbit@claude-plugins-official
 ```
 
-```
+```text
 /coderabbit:review    — Ejecutar revisión CodeRabbit en los cambios actuales
 ```
 
@@ -1126,7 +1126,7 @@ Claude Code puede lanzar subagentes de revisión que comprueban tu trabajo contr
 
 También puedes activarlo manualmente:
 
-```
+```text
 /code-review
 ```
 
@@ -1162,7 +1162,7 @@ En el selector `/resume`:
 
 ¿Necesitas ejecutar un comando de shell rápido sin gastar un round-trip de llamada a herramienta? Prefixa con `!`:
 
-```
+```text
 ! git status
 ! npm test
 ! ls -la src/
@@ -1192,7 +1192,7 @@ Cuando tu conversación se alarga, Claude Code comprime los mensajes más antigu
 
 Las tareas sobreviven a esta compresión. Siempre son visibles, incluso después de la compactación.
 
-```
+```text
 TaskCreate   — Crear una tarea
 TaskUpdate   — Marcar in_progress, completed o blocked
 TaskList     — Ver todas las tareas actuales

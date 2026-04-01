@@ -6,7 +6,7 @@ plugins:
 
 # GitHub Pages settings
 baseurl: "/cc-best-practices"
-url: ""
+url: "https://eligoss.github.io"
 
 # Markdown rendering
 markdown: kramdown

@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Найкращі практики Claude Code
-lang: ua
+lang: uk
 ---
 
-{% include_relative README.ua.md %}
+{% include_relative README.uk.md %}

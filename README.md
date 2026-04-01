@@ -1,6 +1,6 @@
-**English** | [Русский](README.ru.md) | [Українська](README.ua.md) | [Español](README.es.md)
-
 # Claude Code Best Practices
+
+**English** | [Русский](README.ru.md) | [Українська](README.uk.md) | [Español](README.es.md)
 
 > **Who is this for?** Developers who already use Claude Code and want to go from "it works" to "this is genuinely 10x." Whether you've been using it for a week or six months, there's something here for you.
 
@@ -94,7 +94,7 @@ Some commonly used ones:
 
 Slash commands are how you invoke skills from plugins. Type `/` and you'll see what's available:
 
-```
+```text
 /commit              Create a git commit
 /code-review         Review a pull request
 /revise-claude-md    Update CLAUDE.md with session learnings
@@ -238,7 +238,7 @@ Skills solve this. They're like CLAUDE.md sections that load **on demand** inste
 
 A skill is a markdown file with a description. When Claude starts a task, it checks: "Does any skill match what I'm about to do?" If yes, it loads that skill's content. If not, it stays out of the way.
 
-```
+```text
 You: Fix the flaky test in UserService
 
 Claude: [sees this is a testing task]
@@ -288,7 +288,7 @@ claude plugin install skill-creator@claude-plugins-official
 
 Then just tell it what you know:
 
-```
+```text
 You: /skill-creator
 
 Claude: What knowledge do you want to turn into a skill?
@@ -357,7 +357,7 @@ Superpowers adds a set of **process skills** that activate based on what you're 
 
 **Without Superpowers**, a typical session looks like:
 
-```
+```text
 You: Implement user authentication with OAuth
 
 Claude: Sure! Let me create the auth middleware...
@@ -370,7 +370,7 @@ Claude: Sure! Let me create the auth middleware...
 
 **With Superpowers:**
 
-```
+```text
 You: Implement user authentication with OAuth
 
 Claude: [Brainstorming activates]
@@ -469,7 +469,7 @@ At session start, call `activate_project("my-project")`.
 
 The most efficient way to explore code with Serena follows a **zoom-in** pattern:
 
-```
+```text
 list_dir                → What's in this directory?
 get_symbols_overview    → What symbols are in this file? (no bodies — just names and signatures)
 find_symbol             → Show me the full body of this one function
@@ -478,7 +478,7 @@ find_referencing_symbols → Who uses this? (before I change it)
 
 And for editing:
 
-```
+```text
 replace_symbol_body   → Rewrite a function body precisely
 insert_before_symbol  → Add something above a symbol
 insert_after_symbol   → Add something below a symbol
@@ -605,7 +605,7 @@ When using Graphiti tools, always use `group_id="my-project"`.
 ```
 
 **Session start** — Claude loads relevant context:
-```
+```text
 search_memory_facts(
   query="architecture decisions patterns",
   group_ids=["my-project"]
@@ -613,7 +613,7 @@ search_memory_facts(
 ```
 
 **Session end** — Claude saves what it learned:
-```
+```text
 add_memory(
   group_id="my-project",
   content="Decided to use event sourcing for order processing
@@ -1006,7 +1006,7 @@ That said, the 1M window plus subagent delegation means context management is le
 
 **Custom `/compact` instructions work.** Instead of just `/compact`, try:
 
-```
+```text
 /compact Keep the architectural decisions and test commands,
          summarize the debugging session
 ```
@@ -1059,7 +1059,7 @@ High-output teams run 5-15 Claude sessions simultaneously — some in terminal t
 ```
 
 **Copy env files into new worktrees** with `.worktreeinclude`:
-```
+```text
 # .worktreeinclude — gitignored files to copy into each new worktree
 .env.local
 .env.development
@@ -1109,7 +1109,7 @@ CodeRabbit reviews your pull requests automatically on GitHub. It catches issues
 claude plugin install coderabbit@claude-plugins-official
 ```
 
-```
+```text
 /coderabbit:review    — Run CodeRabbit review on current changes
 ```
 
@@ -1126,7 +1126,7 @@ Claude Code can spawn review subagents that check your work against the plan and
 
 You can also trigger it manually:
 
-```
+```text
 /code-review
 ```
 
@@ -1162,7 +1162,7 @@ When in the `/resume` picker:
 
 Need to run a quick shell command without wasting a tool call round-trip? Prefix it with `!`:
 
-```
+```text
 ! git status
 ! npm test
 ! ls -la src/
@@ -1192,7 +1192,7 @@ When your conversation gets long, Claude Code compresses older messages to stay 
 
 Tasks survive this compression. They're always visible, even after compaction.
 
-```
+```text
 TaskCreate   — Create a task
 TaskUpdate   — Mark in_progress, completed, or blocked
 TaskList     — See all current tasks
