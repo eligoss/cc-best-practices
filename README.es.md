@@ -605,6 +605,7 @@ When using Graphiti tools, always use `group_id="my-project"`.
 ```
 
 **Inicio de sesión** — Claude carga contexto relevante:
+
 ```text
 search_memory_facts(
   query="architecture decisions patterns",
@@ -613,6 +614,7 @@ search_memory_facts(
 ```
 
 **Fin de sesión** — Claude guarda lo que aprendió:
+
 ```text
 add_memory(
   group_id="my-project",
@@ -969,6 +971,7 @@ Los Agent Teams van más allá de los simples subagentes. En lugar de delegació
 Piénsalo como pasar de "un desarrollador con asistentes" a "un pequeño equipo trabajando juntos."
 
 Actívalo:
+
 ```json
 {
   "env": {
@@ -1054,11 +1057,13 @@ Los equipos de alto rendimiento ejecutan 5-15 sesiones de Claude simultáneament
 ### Consejos de configuración
 
 **Añade el directorio de worktrees al gitignore:**
+
 ```gitignore
 .claude/worktrees/
 ```
 
 **Copia archivos env en nuevos worktrees** con `.worktreeinclude`:
+
 ```text
 # .worktreeinclude — archivos en gitignore que se copian en cada nuevo worktree
 .env.local
