@@ -170,7 +170,7 @@ This is where project-specific knowledge lives. Think of it as the onboarding do
 
 > **What doesn't belong here:** Generic coding advice (that's global), tool activation instructions (also global), anything temporary (that's tasks or memory).
 
-> **Want to see real examples?** The [Examples page](examples.md) has 7 anonymized, production CLAUDE.md files — from a 30-line simple website to a 380-line iOS app — with annotations on why each section works.
+> **Want to see real examples?** The [Examples page](examples.md) has annotated, production CLAUDE.md files — a global config and a detailed iOS project — with analysis of why each section works.
 
 ### Starting from scratch? Use `/init`
 
@@ -1368,7 +1368,7 @@ If you're setting up from scratch, here's the order that gives you the most valu
 
 Each step builds on the previous ones. You don't have to do them all at once — even steps 1-5 will make a noticeable difference.
 
-**Need inspiration?** Check the [Real-World Examples](examples.md) page for 7 annotated CLAUDE.md files across different stacks — global config, iOS, React Native, NestJS, CLI tools, websites, and even creative writing.
+**Need inspiration?** Check the [Real-World Examples](examples.md) page for annotated, production CLAUDE.md files with analysis of what makes each section effective.
 
 ---
 
