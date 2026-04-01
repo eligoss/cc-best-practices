@@ -170,6 +170,8 @@ This is where project-specific knowledge lives. Think of it as the onboarding do
 
 > **What doesn't belong here:** Generic coding advice (that's global), tool activation instructions (also global), anything temporary (that's tasks or memory).
 
+> **Want to see real examples?** The [Examples page](examples.md) has 7 anonymized, production CLAUDE.md files — from a 30-line simple website to a 380-line iOS app — with annotations on why each section works.
+
 ### Starting from scratch? Use `/init`
 
 If you're setting up CLAUDE.md for an existing project, don't start from a blank file. Claude Code's `/init` command explores your codebase — package files, config, directory structure, existing docs — and generates a starter CLAUDE.md automatically:
@@ -1365,6 +1367,8 @@ If you're setting up from scratch, here's the order that gives you the most valu
 10. **Trust Superpowers** — let it guide the planning, TDD, and verification workflows
 
 Each step builds on the previous ones. You don't have to do them all at once — even steps 1-5 will make a noticeable difference.
+
+**Need inspiration?** Check the [Real-World Examples](examples.md) page for 7 annotated CLAUDE.md files across different stacks — global config, iOS, React Native, NestJS, CLI tools, websites, and even creative writing.
 
 ---
 
