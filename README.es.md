@@ -1,6 +1,6 @@
 # Claude Code: Buenas Prácticas
 
-[English](README.md) | [Русский](README.ru.md) | [Українська](README.uk.md) | **Español**
+[English](.) | [Русский](ru) | [Українська](uk) | **Español**
 
 > **¿Para quién es esto?** Desarrolladores que ya usan Claude Code y quieren pasar de "funciona" a "esto es genuinamente 10 veces mejor." Tanto si llevas una semana usándolo como seis meses, aquí hay algo para ti.
 

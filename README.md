@@ -1,6 +1,6 @@
 # Claude Code Best Practices
 
-**English** | [Русский](README.ru.md) | [Українська](README.uk.md) | [Español](README.es.md)
+**English** | [Русский](ru) | [Українська](uk) | [Español](es)
 
 > **Who is this for?** Developers who already use Claude Code and want to go from "it works" to "this is genuinely 10x." Whether you've been using it for a week or six months, there's something here for you.
 
