@@ -12,29 +12,29 @@ We'll start with the building blocks — plugins, MCP servers, and commands — 
 
 ## Table of Contents
 
-| # | Section | What You'll Learn |
-|---|---------|-------------------|
-| 1 | [The Extension Ecosystem](#1-the-extension-ecosystem) | Plugins, MCP servers, and slash commands — the three ways to extend Claude Code |
-| 2 | [CLAUDE.md Files](#2-claudemd--your-instructions-that-stick) | Global vs project, path-specific rules, and `/init` — what goes where and why |
-| 3 | [Skills](#3-skills--load-knowledge-when-you-need-it) | Turn any project knowledge into on-demand context that doesn't bloat every session |
-| 4 | [Superpowers](#4-superpowers--the-plugin-that-changes-everything) | Structured workflows that turn Claude from assistant to engineering partner |
-| 5 | [Serena](#5-serena--code-navigation-that-understands-your-code) | Navigate and edit code by *meaning*, not just text search |
-| 6 | [Ripgrep](#6-ripgrep--when-text-search-is-the-right-tool) | Fast text search for everything Serena can't see |
-| 7 | [Tool Selection](#7-teaching-claude-when-to-use-what) | The single most impactful table you can add to your config |
-| 8 | [Graphiti](#8-graphiti--memory-that-lasts-across-sessions) | A knowledge graph so Claude remembers what you decided and why |
-| 9 | [Memory Systems](#9-memory--the-right-information-in-the-right-place) | Auto memory, MEMORY.md, Graphiti, CLAUDE.md — which goes where |
-| 10 | [Context7](#10-context7--docs-that-are-actually-current) | Live library documentation because your training data is already stale |
-| 11 | [Hooks and Guardrails](#11-hooks-and-guardrails--automate-and-protect) | Session automation, security hooks, and git hooks working together |
-| 12 | [Permissions and Security](#12-permissions-and-security) | Let Claude move fast without letting it do anything dangerous |
-| 13 | [Subagents and Agent Teams](#13-subagents-and-agent-teams) | The orchestration model, custom agents, model tiers, and multi-agent coordination |
-| 14 | [Context Window Management](#14-context-window-management) | `/compact`, `/clear`, `/btw`, context hygiene, and keeping sessions focused |
-| 15 | [Git Worktrees](#15-git-worktrees--parallel-sessions) | Run multiple Claude sessions on the same repo without conflicts |
-| 16 | [Git and Code Review](#16-git-and-code-review) | Conventional commits, per-step verification, CodeRabbit, and local subagent reviews |
-| 17 | [Session Management](#17-session-management) | Resume, rename, and navigate sessions like a pro |
-| 18 | [Status Line](#18-status-line--see-whats-happening) | Real-time context usage, cost, and session stats at a glance |
-| 19 | [Task Tracking](#19-task-tracking--dont-lose-your-place) | Why in-session tasks matter more than you think |
-| 20 | [Common Failure Patterns](#20-common-failure-patterns--what-to-avoid) | The mistakes everyone makes and how to break the cycle |
-| 21 | [Config Sync](#21-config-sync--same-setup-everywhere) | Keep two machines in lockstep |
+| #  | Section                                                                | What You'll Learn                                                                   |
+|----|------------------------------------------------------------------------|-------------------------------------------------------------------------------------|
+| 1  | [The Extension Ecosystem](#1-the-extension-ecosystem)                  | Plugins, MCP servers, and slash commands — the three ways to extend Claude Code     |
+| 2  | [CLAUDE.md Files](#2-claudemd--your-instructions-that-stick)           | Global vs project, path-specific rules, and `/init` — what goes where and why       |
+| 3  | [Skills](#3-skills--load-knowledge-when-you-need-it)                   | Turn any project knowledge into on-demand context that doesn't bloat every session  |
+| 4  | [Superpowers](#4-superpowers--the-plugin-that-changes-everything)      | Structured workflows that turn Claude from assistant to engineering partner         |
+| 5  | [Serena](#5-serena--code-navigation-that-understands-your-code)        | Navigate and edit code by *meaning*, not just text search                           |
+| 6  | [Ripgrep](#6-ripgrep--when-text-search-is-the-right-tool)              | Fast text search for everything Serena can't see                                    |
+| 7  | [Tool Selection](#7-teaching-claude-when-to-use-what)                  | The single most impactful table you can add to your config                          |
+| 8  | [Graphiti](#8-graphiti--memory-that-lasts-across-sessions)             | A knowledge graph so Claude remembers what you decided and why                      |
+| 9  | [Memory Systems](#9-memory--the-right-information-in-the-right-place)  | Auto memory, MEMORY.md, Graphiti, CLAUDE.md — which goes where                      |
+| 10 | [Context7](#10-context7--docs-that-are-actually-current)               | Live library documentation because your training data is already stale              |
+| 11 | [Hooks and Guardrails](#11-hooks-and-guardrails--automate-and-protect) | Session automation, security hooks, and git hooks working together                  |
+| 12 | [Permissions and Security](#12-permissions-and-security)               | Let Claude move fast without letting it do anything dangerous                       |
+| 13 | [Subagents and Agent Teams](#13-subagents-and-agent-teams)             | The orchestration model, custom agents, model tiers, and multi-agent coordination   |
+| 14 | [Context Window Management](#14-context-window-management)             | `/compact`, `/clear`, `/btw`, context hygiene, and keeping sessions focused         |
+| 15 | [Git Worktrees](#15-git-worktrees--parallel-sessions)                  | Run multiple Claude sessions on the same repo without conflicts                     |
+| 16 | [Git and Code Review](#16-git-and-code-review)                         | Conventional commits, per-step verification, CodeRabbit, and local subagent reviews |
+| 17 | [Session Management](#17-session-management)                           | Resume, rename, and navigate sessions like a pro                                    |
+| 18 | [Status Line](#18-status-line--see-whats-happening)                    | Real-time context usage, cost, and session stats at a glance                        |
+| 19 | [Task Tracking](#19-task-tracking--dont-lose-your-place)               | Why in-session tasks matter more than you think                                     |
+| 20 | [Common Failure Patterns](#20-common-failure-patterns--what-to-avoid)  | The mistakes everyone makes and how to break the cycle                              |
+| 21 | [Config Sync](#21-config-sync--same-setup-everywhere)                  | Keep two machines in lockstep                                                       |
 
 ---
 
@@ -58,18 +58,18 @@ claude plugin install superpowers@claude-plugins-official
 
 Here are the plugins worth installing right away — we'll go deeper into the important ones later:
 
-| Plugin | Why You Want It |
-|--------|----------------|
-| **superpowers** | Planning, brainstorming, TDD, debugging, worktrees, code review — the structured workflows that make Claude disciplined |
-| **claude-md-management** | AI-assisted CLAUDE.md writing and auditing |
-| **skill-creator** | Turn any project knowledge into a reusable skill |
-| **serena** | Semantic code navigation — find symbols, references, edit by meaning |
-| **context7** | Live library docs so Claude doesn't hallucinate outdated APIs |
-| **code-review** | PR review workflows with parallel subagent reviewers |
-| **coderabbit** | [CodeRabbit](https://www.coderabbit.ai/) AI review integration |
-| **feature-dev** | Guided feature development with codebase exploration |
-| **playwright** | Browser automation and testing |
-| **plugin-dev** | Tools for building your own plugins |
+| Plugin                   | Why You Want It                                                                                                         |
+|--------------------------|-------------------------------------------------------------------------------------------------------------------------|
+| **superpowers**          | Planning, brainstorming, TDD, debugging, worktrees, code review — the structured workflows that make Claude disciplined |
+| **claude-md-management** | AI-assisted CLAUDE.md writing and auditing                                                                              |
+| **skill-creator**        | Turn any project knowledge into a reusable skill                                                                        |
+| **serena**               | Semantic code navigation — find symbols, references, edit by meaning                                                    |
+| **context7**             | Live library docs so Claude doesn't hallucinate outdated APIs                                                           |
+| **code-review**          | PR review workflows with parallel subagent reviewers                                                                    |
+| **coderabbit**           | [CodeRabbit](https://www.coderabbit.ai/) AI review integration                                                          |
+| **feature-dev**          | Guided feature development with codebase exploration                                                                    |
+| **playwright**           | Browser automation and testing                                                                                          |
+| **plugin-dev**           | Tools for building your own plugins                                                                                     |
 
 ### MCP Servers — external tools
 
@@ -82,12 +82,12 @@ claude mcp list
 
 Some commonly used ones:
 
-| Server | What It Does |
-|--------|-------------|
-| **Graphiti** | Knowledge graph for persistent memory |
-| **JetBrains** | Build, test, and refactor from your IDE |
-| **Atlassian** | Jira + Confluence (often pre-installed via OAuth) |
-| **Sentry** | Error tracking and issue investigation |
+| Server         | What It Does                                       |
+|----------------|----------------------------------------------------|
+| **Graphiti**   | Knowledge graph for persistent memory              |
+| **JetBrains**  | Build, test, and refactor from your IDE            |
+| **Atlassian**  | Jira + Confluence (often pre-installed via OAuth)  |
+| **Sentry**     | Error tracking and issue investigation             |
 | **Docker MCP** | A catalog of MCP servers you can install on demand |
 
 ### Slash Commands — the user interface
@@ -114,11 +114,11 @@ Every time you start a session, Claude reads your CLAUDE.md files. They're your 
 
 ### Two files, two jobs
 
-| | Global (`~/.claude/CLAUDE.md`) | Project (`<repo>/CLAUDE.md`) |
-|-|-------------------------------|------------------------------|
-| **Loaded** | Every session, every project | Only in that project |
-| **Think of it as** | Your developer profile | The project handbook |
-| **Contains** | How *you* work | How *this codebase* works |
+|                    | Global (`~/.claude/CLAUDE.md`) | Project (`<repo>/CLAUDE.md`) |
+|--------------------|--------------------------------|------------------------------|
+| **Loaded**         | Every session, every project   | Only in that project         |
+| **Think of it as** | Your developer profile         | The project handbook         |
+| **Contains**       | How *you* work                 | How *this codebase* works    |
 
 ### Your global file: the developer profile
 
@@ -212,10 +212,10 @@ The **claude-md-management** plugin has two skills that do the heavy lifting:
 claude plugin install claude-md-management@claude-plugins-official
 ```
 
-| Command | What It Does |
-|---------|-------------|
-| `/claude-md-improver` | Audits your existing CLAUDE.md for gaps, inconsistencies, and missed best practices |
-| `/revise-claude-md` | After a working session, captures what you learned — new patterns, pitfalls, corrections |
+| Command               | What It Does                                                                             |
+|-----------------------|------------------------------------------------------------------------------------------|
+| `/claude-md-improver` | Audits your existing CLAUDE.md for gaps, inconsistencies, and missed best practices      |
+| `/revise-claude-md`   | After a working session, captures what you learned — new patterns, pitfalls, corrections |
 
 **The habit that pays off:** Run `/revise-claude-md` at the end of any session where you discovered something about the project. Over time, your CLAUDE.md evolves from a stub into a comprehensive, battle-tested handbook — without you having to write it from scratch.
 
@@ -342,18 +342,18 @@ claude plugin install superpowers@claude-plugins-official
 
 Superpowers adds a set of **process skills** that activate based on what you're doing:
 
-| When you're... | Superpowers activates... | Which means Claude will... |
-|----------------|-------------------------|---------------------------|
-| Starting something new | **Brainstorming** | Present 2-3 approaches with trade-offs before writing any code |
-| Ready to build | **Writing Plans** | Create a step-by-step implementation plan for your approval |
-| Building | **Executing Plans** | Follow the plan step by step, with progress tracking |
-| Writing any feature or fix | **Test-Driven Development** | Write a failing test *first*, then the implementation |
-| Hitting a bug | **Systematic Debugging** | Form hypotheses, test them methodically, narrow down the cause |
-| Finishing a chunk of work | **Code Review** | Review against the plan and project standards |
-| About to say "done" | **Verification** | Run final checks before claiming completion |
-| Facing independent tasks | **Parallel Agents** | Dispatch multiple agents simultaneously |
-| Starting feature work | **Git Worktrees** | Isolate work in a dedicated worktree branch |
-| Completing a branch | **Finishing a Branch** | Clean branch finalization and PR readiness |
+| When you're...             | Superpowers activates...    | Which means Claude will...                                     |
+|----------------------------|-----------------------------|----------------------------------------------------------------|
+| Starting something new     | **Brainstorming**           | Present 2-3 approaches with trade-offs before writing any code |
+| Ready to build             | **Writing Plans**           | Create a step-by-step implementation plan for your approval    |
+| Building                   | **Executing Plans**         | Follow the plan step by step, with progress tracking           |
+| Writing any feature or fix | **Test-Driven Development** | Write a failing test *first*, then the implementation          |
+| Hitting a bug              | **Systematic Debugging**    | Form hypotheses, test them methodically, narrow down the cause |
+| Finishing a chunk of work  | **Code Review**             | Review against the plan and project standards                  |
+| About to say "done"        | **Verification**            | Run final checks before claiming completion                    |
+| Facing independent tasks   | **Parallel Agents**         | Dispatch multiple agents simultaneously                        |
+| Starting feature work      | **Git Worktrees**           | Isolate work in a dedicated worktree branch                    |
+| Completing a branch        | **Finishing a Branch**      | Clean branch finalization and PR readiness                     |
 
 ### Why this is critically helpful
 
@@ -437,12 +437,12 @@ Serena changes this. It's a language-aware MCP server that understands your code
 
 ### What the difference feels like
 
-| The old way | With Serena |
-|-------------|-------------|
-| `grep -r "class UserService"` across the whole project | `find_symbol("UserService")` — goes straight there |
-| Read the whole file to understand its structure | `get_symbols_overview("user-service.ts")` — just the outline |
-| Find-and-replace to rename something | `rename_symbol("oldName", "newName")` — safe, semantic |
-| Manually search for "who calls this?" | `find_referencing_symbols("UserService")` — complete answer |
+| The old way                                            | With Serena                                                  |
+|--------------------------------------------------------|--------------------------------------------------------------|
+| `grep -r "class UserService"` across the whole project | `find_symbol("UserService")` — goes straight there           |
+| Read the whole file to understand its structure        | `get_symbols_overview("user-service.ts")` — just the outline |
+| Find-and-replace to rename something                   | `rename_symbol("oldName", "newName")` — safe, semantic       |
+| Manually search for "who calls this?"                  | `find_referencing_symbols("UserService")` — complete answer  |
 
 The token savings alone are significant. But the real win is accuracy — Serena finds the *definition*, not just string matches.
 
@@ -504,7 +504,7 @@ Ripgrep (`rg`) is a fast text search tool, and Claude Code uses it under the hoo
 
 ### Quick setup
 
-```json
+```jsonc
 // ~/.claude/settings.json
 {
   "env": {
@@ -523,13 +523,13 @@ sudo apt install ripgrep    # Ubuntu/Debian
 
 These two tools complement each other perfectly, and teaching Claude when to use each one is one of the highest-value things you can do (more on this in [Section 7](#7-teaching-claude-when-to-use-what)):
 
-| Reach for Ripgrep when you need | Reach for Serena when you need |
-|--------------------------------|-------------------------------|
-| String literals, error messages | Function/class definitions |
-| Config values across many files | Who references this symbol? |
-| Non-code files (docs, JSON, YAML) | The body of a specific method |
-| Regex patterns anywhere | Safe symbol renaming |
-| "Find every file mentioning X" | "What does this file's API look like?" |
+| Reach for Ripgrep when you need   | Reach for Serena when you need         |
+|-----------------------------------|----------------------------------------|
+| String literals, error messages   | Function/class definitions             |
+| Config values across many files   | Who references this symbol?            |
+| Non-code files (docs, JSON, YAML) | The body of a specific method          |
+| Regex patterns anywhere           | Safe symbol renaming                   |
+| "Find every file mentioning X"    | "What does this file's API look like?" |
 
 Neither tool replaces the other. Together, they cover everything.
 
@@ -545,24 +545,24 @@ Claude has a lot of tools available — Serena, Ripgrep, Glob, Context7, Graphit
 
 Add this to your global CLAUDE.md. Seriously, just paste it in:
 
-| Task | Best Tool | Why |
-|------|-----------|-----|
-| Find a symbol/class/function | Serena `find_symbol` | Semantic, language-aware |
-| Understand file structure | Serena `get_symbols_overview` | Token-efficient — just the outline |
-| Check references before changing something | Serena `find_referencing_symbols` | Complete — catches every usage |
-| Read a known file | `Read` | Direct, no overhead — use Serena only when you need structure |
-| Search string literals, config values, error messages | `Grep` (ripgrep) | Text patterns that aren't code symbols |
-| Search non-code files (markdown, JSON, YAML) | `Grep` (ripgrep) | Serena only indexes code |
-| Find files by name or pattern | `Glob` | Faster than any search for file discovery |
-| Replace a function/method body | Serena `replace_symbol_body` | Precise, symbol-level replacement |
-| Small code fix (line-level tweak) | `Edit` | Faster than Serena for surgical changes |
-| Edit config or non-code files | `Edit` | Serena doesn't handle non-code |
-| Type errors and diagnostics | TypeScript LSP / Swift LSP | Real-time type checking without a full build |
-| Rename across codebase | Serena `rename_symbol` | Semantic rename, not text find-replace |
-| Look up a library's current API | Context7 | Real-time docs — training data may be stale |
-| Run build, test, lint | `Bash` | Verification commands and scripts |
-| Recall a past decision or pattern | Graphiti `search_memory_facts` | Cross-session knowledge graph |
-| Quick project facts (IDs, keys, status) | MEMORY.md | Already in context — no tool call needed |
+| Task                                                  | Best Tool                         | Why                                                           |
+|-------------------------------------------------------|-----------------------------------|---------------------------------------------------------------|
+| Find a symbol/class/function                          | Serena `find_symbol`              | Semantic, language-aware                                      |
+| Understand file structure                             | Serena `get_symbols_overview`     | Token-efficient — just the outline                            |
+| Check references before changing something            | Serena `find_referencing_symbols` | Complete — catches every usage                                |
+| Read a known file                                     | `Read`                            | Direct, no overhead — use Serena only when you need structure |
+| Search string literals, config values, error messages | `Grep` (ripgrep)                  | Text patterns that aren't code symbols                        |
+| Search non-code files (markdown, JSON, YAML)          | `Grep` (ripgrep)                  | Serena only indexes code                                      |
+| Find files by name or pattern                         | `Glob`                            | Faster than any search for file discovery                     |
+| Replace a function/method body                        | Serena `replace_symbol_body`      | Precise, symbol-level replacement                             |
+| Small code fix (line-level tweak)                     | `Edit`                            | Faster than Serena for surgical changes                       |
+| Edit config or non-code files                         | `Edit`                            | Serena doesn't handle non-code                                |
+| Type errors and diagnostics                           | TypeScript LSP / Swift LSP        | Real-time type checking without a full build                  |
+| Rename across codebase                                | Serena `rename_symbol`            | Semantic rename, not text find-replace                        |
+| Look up a library's current API                       | Context7                          | Real-time docs — training data may be stale                   |
+| Run build, test, lint                                 | `Bash`                            | Verification commands and scripts                             |
+| Recall a past decision or pattern                     | Graphiti `search_memory_facts`    | Cross-session knowledge graph                                 |
+| Quick project facts (IDs, keys, status)               | MEMORY.md                         | Already in context — no tool call needed                      |
 
 **The rule of thumb:** Serena for code symbols. Grep for text and non-code. Glob for files. Context7 for docs. Graphiti for memory. LSP for type checking. Read/Edit for direct file work.
 
@@ -641,14 +641,14 @@ Claude Code has multiple memory systems, and they each do something different. U
 
 ### The cheat sheet
 
-| What You're Storing | Where It Goes | Why There |
-|--------------------|--------------|-----------|
-| Persistent instructions and rules | **CLAUDE.md** | Always loaded, always followed — you write it |
-| Quick-reference facts (IDs, names, status flags) | **MEMORY.md** | Auto-loaded per project, scannable |
-| Patterns Claude discovers while working | **Auto Memory** | Claude writes these itself as it works |
-| Decisions with rich context (the *why*) | **Graphiti** | Searchable, timestamped, relational |
-| Current task progress | **Tasks** | Survives context compaction |
-| Deep topic-specific knowledge | **Skills** | Loaded on demand, not always |
+| What You're Storing                              | Where It Goes   | Why There                                     |
+|--------------------------------------------------|-----------------|-----------------------------------------------|
+| Persistent instructions and rules                | **CLAUDE.md**   | Always loaded, always followed — you write it |
+| Quick-reference facts (IDs, names, status flags) | **MEMORY.md**   | Auto-loaded per project, scannable            |
+| Patterns Claude discovers while working          | **Auto Memory** | Claude writes these itself as it works        |
+| Decisions with rich context (the *why*)          | **Graphiti**    | Searchable, timestamped, relational           |
+| Current task progress                            | **Tasks**       | Survives context compaction                   |
+| Deep topic-specific knowledge                    | **Skills**      | Loaded on demand, not always                  |
 
 ### Auto Memory — Claude teaching itself
 
@@ -723,7 +723,7 @@ Hooks serve two purposes: **automation** (so you don't forget to do things) and 
 
 Set up a hook that runs at the start of every session:
 
-```json
+```jsonc
 // ~/.claude/settings.json
 {
   "hooks": {
@@ -788,11 +788,11 @@ A stop hook runs when Claude is about to finish. Use it to catch unsaved knowled
 
 Hooks come in three flavors, each for a different level of verification:
 
-| Type | What It Does | Best For |
-|------|-------------|----------|
-| `command` | Runs a shell script, checks exit code | Linting, formatting, notifications |
-| `prompt` | Sends a prompt to a Claude model for single-turn evaluation | Lightweight review, security checks |
-| `agent` | Spawns a subagent with full tool access (up to 50 turns) | Deep verification, multi-file checks |
+| Type      | What It Does                                                | Best For                             |
+|-----------|-------------------------------------------------------------|--------------------------------------|
+| `command` | Runs a shell script, checks exit code                       | Linting, formatting, notifications   |
+| `prompt`  | Sends a prompt to a Claude model for single-turn evaluation | Lightweight review, security checks  |
+| `agent`   | Spawns a subagent with full tool access (up to 50 turns)    | Deep verification, multi-file checks |
 
 A `prompt` hook is perfect for "is this code safe?" checks without the overhead of a full subagent. An `agent` hook can read files, run searches, and verify conditions across the codebase before allowing a tool call through.
 
@@ -847,7 +847,7 @@ Claude Code's permission system controls what Claude can do without asking you. 
 
 ### The three tiers
 
-```json
+```jsonc
 {
   "permissions": {
     "allow": [
@@ -924,12 +924,12 @@ The most effective way to use Claude Code is to think of your main session as an
 
 This isn't just a nice mental model — it's how the best configurations are structured:
 
-| Role | Model | Use When |
-|------|-------|----------|
-| **Orchestrator** (main session) | `opus` | Always — planning, review, validation, coordination |
-| **Implementation agent** | `sonnet` | Writing code, tests, standard refactors |
-| **Exploration agent** | `haiku` | Broad codebase search, quick lookups, file discovery |
-| **Critical sub-agent** | `opus` | When complexity or impact demands getting it right |
+| Role                            | Model    | Use When                                             |
+|---------------------------------|----------|------------------------------------------------------|
+| **Orchestrator** (main session) | `opus`   | Always — planning, review, validation, coordination  |
+| **Implementation agent**        | `sonnet` | Writing code, tests, standard refactors              |
+| **Exploration agent**           | `haiku`  | Broad codebase search, quick lookups, file discovery |
+| **Critical sub-agent**          | `opus`   | When complexity or impact demands getting it right   |
 
 Add this to your global CLAUDE.md:
 
@@ -1017,25 +1017,25 @@ This has a direct practical consequence: **compact and continue is almost always
 
 ### The key commands
 
-| Command | What It Does | When to Use |
-|---------|-------------|-------------|
-| `/compact` | Compresses conversation history, preserving key context | When the session feels sluggish or you're switching subtasks |
-| `/compact Focus on the API changes` | Guided compression — tells Claude what to preserve | When you want specific context to survive |
-| `/clear` | Wipes conversation history entirely | Between unrelated tasks — the most underused command |
-| `/btw` | Ask a side question that doesn't enter history | Quick lookups that shouldn't grow context |
-| `/context` | Shows per-category token breakdown | Diagnosing what's eating your context |
-| `Ctrl+B` | Background a running subagent | When a subagent is taking long and you want to do something else |
+| Command                             | What It Does                                            | When to Use                                                      |
+|-------------------------------------|---------------------------------------------------------|------------------------------------------------------------------|
+| `/compact`                          | Compresses conversation history, preserving key context | When the session feels sluggish or you're switching subtasks     |
+| `/compact Focus on the API changes` | Guided compression — tells Claude what to preserve      | When you want specific context to survive                        |
+| `/clear`                            | Wipes conversation history entirely                     | Between unrelated tasks — the most underused command             |
+| `/btw`                              | Ask a side question that doesn't enter history          | Quick lookups that shouldn't grow context                        |
+| `/context`                          | Shows per-category token breakdown                      | Diagnosing what's eating your context                            |
+| `Ctrl+B`                            | Background a running subagent                           | When a subagent is taking long and you want to do something else |
 
 ### Compact vs clear vs new session
 
 This is a decision you'll make dozens of times. Here's the rule:
 
-| Situation | Best Action | Why |
-|-----------|------------|-----|
-| Switching to **unrelated** work | `/clear` | Old context is pure noise for the new task |
-| Continuing **similar** work after a chunk is done | `/compact` | Keep the decisions, shed the tool outputs |
-| Session feels sluggish or Claude forgets instructions | `/compact` with guidance | Reset the noise while preserving what matters |
-| Starting a completely **different project** | New session | Different CLAUDE.md, different Serena project, different everything |
+| Situation                                             | Best Action              | Why                                                                 |
+|-------------------------------------------------------|--------------------------|---------------------------------------------------------------------|
+| Switching to **unrelated** work                       | `/clear`                 | Old context is pure noise for the new task                          |
+| Continuing **similar** work after a chunk is done     | `/compact`               | Keep the decisions, shed the tool outputs                           |
+| Session feels sluggish or Claude forgets instructions | `/compact` with guidance | Reset the noise while preserving what matters                       |
+| Starting a completely **different project**           | New session              | Different CLAUDE.md, different Serena project, different everything |
 
 The key insight: **`/compact` + continue beats a new session** when the work is related. A compacted session retains your architectural decisions, agreed-upon patterns, and task progress. A new session starts cold and has to rediscover all of that.
 
@@ -1216,13 +1216,13 @@ Sessions in Claude Code aren't disposable — you can resume them, name them, an
 
 ### Key commands
 
-| Command | What It Does |
-|---------|-------------|
-| `claude --continue` | Resume the most recent session |
-| `claude --resume` | Open a session picker to choose which to resume |
-| `claude -n auth-refactor` | Start a named session (easier to find later) |
-| `/rename auth-refactor` | Rename the current session |
-| `claude --from-pr 123` | Resume a session linked to a specific PR |
+| Command                   | What It Does                                    |
+|---------------------------|-------------------------------------------------|
+| `claude --continue`       | Resume the most recent session                  |
+| `claude --resume`         | Open a session picker to choose which to resume |
+| `claude -n auth-refactor` | Start a named session (easier to find later)    |
+| `/rename auth-refactor`   | Rename the current session                      |
+| `claude --from-pr 123`    | Resume a session linked to a specific PR        |
 
 ### Session picker shortcuts
 

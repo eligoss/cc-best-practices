@@ -12,29 +12,29 @@ Empezaremos con los bloques fundamentales — plugins, servidores MCP y comandos
 
 ## Tabla de Contenidos
 
-| # | Sección | Qué Aprenderás |
-|---|---------|----------------|
-| 1 | [El Ecosistema de Extensiones](#1-el-ecosistema-de-extensiones) | Plugins, servidores MCP y slash commands — las tres formas de extender Claude Code |
-| 2 | [Archivos CLAUDE.md](#2-claudemd--tus-instrucciones-permanentes) | Global vs proyecto, reglas por ruta y `/init` — qué va dónde y por qué |
-| 3 | [Skills](#3-skills--carga-conocimiento-cuando-lo-necesitas) | Convierte cualquier conocimiento de proyecto en contexto bajo demanda sin sobrecargar cada sesión |
-| 4 | [Superpowers](#4-superpowers--el-plugin-que-lo-cambia-todo) | Flujos de trabajo estructurados que convierten a Claude de asistente en compañero de ingeniería |
-| 5 | [Serena](#5-serena--navegación-de-código-que-entiende-tu-código) | Navega y edita código por *significado*, no solo por búsqueda de texto |
-| 6 | [Ripgrep](#6-ripgrep--cuando-la-búsqueda-de-texto-es-la-herramienta-correcta) | Búsqueda de texto rápida para todo lo que Serena no puede ver |
-| 7 | [Selección de Herramientas](#7-enseñar-a-claude-cuándo-usar-qué) | La tabla más impactante que puedes agregar a tu configuración |
-| 8 | [Graphiti](#8-graphiti--memoria-que-persiste-entre-sesiones) | Un grafo de conocimiento para que Claude recuerde qué decidiste y por qué |
-| 9 | [Sistemas de Memoria](#9-memoria--la-información-correcta-en-el-lugar-correcto) | Auto memory, MEMORY.md, Graphiti, CLAUDE.md — qué va dónde |
-| 10 | [Context7](#10-context7--documentación-actualizada-de-verdad) | Documentación de librerías en tiempo real, porque tus datos de entrenamiento ya están desactualizados |
-| 11 | [Hooks y Guardarraíles](#11-hooks-y-guardarraíles--automatiza-y-protege) | Automatización de sesiones, hooks de seguridad y git hooks trabajando juntos |
-| 12 | [Permisos y Seguridad](#12-permisos-y-seguridad) | Deja que Claude vaya rápido sin que pueda hacer nada peligroso |
-| 13 | [Subagentes y Equipos de Agentes](#13-subagentes-y-equipos-de-agentes) | El modelo de orquestación, agentes personalizados, niveles de modelos y coordinación multi-agente |
-| 14 | [Gestión de la Ventana de Contexto](#14-gestión-de-la-ventana-de-contexto) | `/compact`, `/clear`, `/btw`, higiene del contexto y mantener las sesiones enfocadas |
-| 15 | [Git Worktrees](#15-git-worktrees--sesiones-en-paralelo) | Ejecuta múltiples sesiones de Claude en el mismo repo sin conflictos |
-| 16 | [Git y Code Review](#16-git-y-code-review) | Commits convencionales, verificación por paso, CodeRabbit y revisiones locales con subagentes |
-| 17 | [Gestión de Sesiones](#17-gestión-de-sesiones) | Retoma, renombra y navega sesiones como un profesional |
-| 18 | [Línea de Estado](#18-línea-de-estado--ve-qué-está-pasando) | Uso de contexto, coste y estadísticas de sesión en tiempo real de un vistazo |
-| 19 | [Seguimiento de Tareas](#19-seguimiento-de-tareas--no-pierdas-el-hilo) | Por qué las tareas en sesión importan más de lo que crees |
-| 20 | [Patrones de Fallo Comunes](#20-patrones-de-fallo-comunes--qué-evitar) | Los errores que todos cometen y cómo romper el ciclo |
-| 21 | [Config Sync](#21-config-sync--la-misma-configuración-en-todas-partes) | Mantén dos máquinas perfectamente sincronizadas |
+| #  | Sección                                                                         | Qué Aprenderás                                                                                        |
+|----|---------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
+| 1  | [El Ecosistema de Extensiones](#1-el-ecosistema-de-extensiones)                 | Plugins, servidores MCP y slash commands — las tres formas de extender Claude Code                    |
+| 2  | [Archivos CLAUDE.md](#2-claudemd--tus-instrucciones-permanentes)                | Global vs proyecto, reglas por ruta y `/init` — qué va dónde y por qué                                |
+| 3  | [Skills](#3-skills--carga-conocimiento-cuando-lo-necesitas)                     | Convierte cualquier conocimiento de proyecto en contexto bajo demanda sin sobrecargar cada sesión     |
+| 4  | [Superpowers](#4-superpowers--el-plugin-que-lo-cambia-todo)                     | Flujos de trabajo estructurados que convierten a Claude de asistente en compañero de ingeniería       |
+| 5  | [Serena](#5-serena--navegación-de-código-que-entiende-tu-código)                | Navega y edita código por *significado*, no solo por búsqueda de texto                                |
+| 6  | [Ripgrep](#6-ripgrep--cuando-la-búsqueda-de-texto-es-la-herramienta-correcta)   | Búsqueda de texto rápida para todo lo que Serena no puede ver                                         |
+| 7  | [Selección de Herramientas](#7-enseñar-a-claude-cuándo-usar-qué)                | La tabla más impactante que puedes agregar a tu configuración                                         |
+| 8  | [Graphiti](#8-graphiti--memoria-que-persiste-entre-sesiones)                    | Un grafo de conocimiento para que Claude recuerde qué decidiste y por qué                             |
+| 9  | [Sistemas de Memoria](#9-memoria--la-información-correcta-en-el-lugar-correcto) | Auto memory, MEMORY.md, Graphiti, CLAUDE.md — qué va dónde                                            |
+| 10 | [Context7](#10-context7--documentación-actualizada-de-verdad)                   | Documentación de librerías en tiempo real, porque tus datos de entrenamiento ya están desactualizados |
+| 11 | [Hooks y Guardarraíles](#11-hooks-y-guardarraíles--automatiza-y-protege)        | Automatización de sesiones, hooks de seguridad y git hooks trabajando juntos                          |
+| 12 | [Permisos y Seguridad](#12-permisos-y-seguridad)                                | Deja que Claude vaya rápido sin que pueda hacer nada peligroso                                        |
+| 13 | [Subagentes y Equipos de Agentes](#13-subagentes-y-equipos-de-agentes)          | El modelo de orquestación, agentes personalizados, niveles de modelos y coordinación multi-agente     |
+| 14 | [Gestión de la Ventana de Contexto](#14-gestión-de-la-ventana-de-contexto)      | `/compact`, `/clear`, `/btw`, higiene del contexto y mantener las sesiones enfocadas                  |
+| 15 | [Git Worktrees](#15-git-worktrees--sesiones-en-paralelo)                        | Ejecuta múltiples sesiones de Claude en el mismo repo sin conflictos                                  |
+| 16 | [Git y Code Review](#16-git-y-code-review)                                      | Commits convencionales, verificación por paso, CodeRabbit y revisiones locales con subagentes         |
+| 17 | [Gestión de Sesiones](#17-gestión-de-sesiones)                                  | Retoma, renombra y navega sesiones como un profesional                                                |
+| 18 | [Línea de Estado](#18-línea-de-estado--ve-qué-está-pasando)                     | Uso de contexto, coste y estadísticas de sesión en tiempo real de un vistazo                          |
+| 19 | [Seguimiento de Tareas](#19-seguimiento-de-tareas--no-pierdas-el-hilo)          | Por qué las tareas en sesión importan más de lo que crees                                             |
+| 20 | [Patrones de Fallo Comunes](#20-patrones-de-fallo-comunes--qué-evitar)          | Los errores que todos cometen y cómo romper el ciclo                                                  |
+| 21 | [Config Sync](#21-config-sync--la-misma-configuración-en-todas-partes)          | Mantén dos máquinas perfectamente sincronizadas                                                       |
 
 ---
 
@@ -58,18 +58,18 @@ claude plugin install superpowers@claude-plugins-official
 
 Estos son los plugins que vale la pena instalar de inmediato — profundizaremos en los más importantes más adelante:
 
-| Plugin | Por Qué Lo Quieres |
-|--------|-------------------|
-| **superpowers** | Planificación, brainstorming, TDD, debugging, worktrees, code review — los flujos de trabajo estructurados que hacen a Claude disciplinado |
-| **claude-md-management** | Escritura y auditoría de CLAUDE.md asistidas por IA |
-| **skill-creator** | Convierte cualquier conocimiento de proyecto en un skill reutilizable |
-| **serena** | Navegación de código semántica — encuentra símbolos, referencias, edita por significado |
-| **context7** | Documentación de librerías en tiempo real para que Claude no alucine APIs desactualizadas |
-| **code-review** | Flujos de trabajo de revisión de PRs con revisores subagentes en paralelo |
-| **coderabbit** | Integración con la revisión de IA de [CodeRabbit](https://www.coderabbit.ai/) |
-| **feature-dev** | Desarrollo de funcionalidades guiado con exploración del codebase |
-| **playwright** | Automatización y testing en navegador |
-| **plugin-dev** | Herramientas para construir tus propios plugins |
+| Plugin                   | Por Qué Lo Quieres                                                                                                                         |
+|--------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
+| **superpowers**          | Planificación, brainstorming, TDD, debugging, worktrees, code review — los flujos de trabajo estructurados que hacen a Claude disciplinado |
+| **claude-md-management** | Escritura y auditoría de CLAUDE.md asistidas por IA                                                                                        |
+| **skill-creator**        | Convierte cualquier conocimiento de proyecto en un skill reutilizable                                                                      |
+| **serena**               | Navegación de código semántica — encuentra símbolos, referencias, edita por significado                                                    |
+| **context7**             | Documentación de librerías en tiempo real para que Claude no alucine APIs desactualizadas                                                  |
+| **code-review**          | Flujos de trabajo de revisión de PRs con revisores subagentes en paralelo                                                                  |
+| **coderabbit**           | Integración con la revisión de IA de [CodeRabbit](https://www.coderabbit.ai/)                                                              |
+| **feature-dev**          | Desarrollo de funcionalidades guiado con exploración del codebase                                                                          |
+| **playwright**           | Automatización y testing en navegador                                                                                                      |
+| **plugin-dev**           | Herramientas para construir tus propios plugins                                                                                            |
 
 ### Servidores MCP — herramientas externas
 
@@ -82,12 +82,12 @@ claude mcp list
 
 Algunos de los más usados:
 
-| Servidor | Qué Hace |
-|----------|---------|
-| **Graphiti** | Grafo de conocimiento para memoria persistente |
-| **JetBrains** | Compilar, testear y refactorizar desde tu IDE |
-| **Atlassian** | Jira + Confluence (normalmente preinstalado vía OAuth) |
-| **Sentry** | Seguimiento de errores e investigación de issues |
+| Servidor       | Qué Hace                                                       |
+|----------------|----------------------------------------------------------------|
+| **Graphiti**   | Grafo de conocimiento para memoria persistente                 |
+| **JetBrains**  | Compilar, testear y refactorizar desde tu IDE                  |
+| **Atlassian**  | Jira + Confluence (normalmente preinstalado vía OAuth)         |
+| **Sentry**     | Seguimiento de errores e investigación de issues               |
 | **Docker MCP** | Un catálogo de servidores MCP que puedes instalar bajo demanda |
 
 ### Slash Commands — la interfaz de usuario
@@ -114,11 +114,11 @@ Cada vez que inicias una sesión, Claude lee tus archivos CLAUDE.md. Son tus ins
 
 ### Dos archivos, dos funciones
 
-| | Global (`~/.claude/CLAUDE.md`) | Proyecto (`<repo>/CLAUDE.md`) |
-|-|-------------------------------|------------------------------|
-| **Se carga** | En cada sesión, en cada proyecto | Solo en ese proyecto |
-| **Piénsalo como** | Tu perfil de desarrollador | El manual del proyecto |
-| **Contiene** | Cómo trabajas *tú* | Cómo funciona *este codebase* |
+|                   | Global (`~/.claude/CLAUDE.md`)   | Proyecto (`<repo>/CLAUDE.md`) |
+|-------------------|----------------------------------|-------------------------------|
+| **Se carga**      | En cada sesión, en cada proyecto | Solo en ese proyecto          |
+| **Piénsalo como** | Tu perfil de desarrollador       | El manual del proyecto        |
+| **Contiene**      | Cómo trabajas *tú*               | Cómo funciona *este codebase* |
 
 ### Tu archivo global: el perfil del desarrollador
 
@@ -210,10 +210,10 @@ El plugin **claude-md-management** tiene dos skills que hacen el trabajo pesado:
 claude plugin install claude-md-management@claude-plugins-official
 ```
 
-| Comando | Qué Hace |
-|---------|---------|
+| Comando               | Qué Hace                                                                                                     |
+|-----------------------|--------------------------------------------------------------------------------------------------------------|
 | `/claude-md-improver` | Audita tu CLAUDE.md existente en busca de lagunas, inconsistencias y buenas prácticas que se están perdiendo |
-| `/revise-claude-md` | Después de una sesión de trabajo, captura lo que aprendiste — nuevos patrones, trampas, correcciones |
+| `/revise-claude-md`   | Después de una sesión de trabajo, captura lo que aprendiste — nuevos patrones, trampas, correcciones         |
 
 **El hábito que vale la pena:** Ejecuta `/revise-claude-md` al final de cualquier sesión en la que hayas descubierto algo sobre el proyecto. Con el tiempo, tu CLAUDE.md evoluciona de un esbozo a un manual completo y probado en batalla — sin que tengas que escribirlo desde cero.
 
@@ -340,18 +340,18 @@ claude plugin install superpowers@claude-plugins-official
 
 Superpowers añade un conjunto de **skills de proceso** que se activan en función de lo que estás haciendo:
 
-| Cuando estás... | Superpowers activa... | Lo que significa que Claude... |
-|----------------|----------------------|-------------------------------|
-| Empezando algo nuevo | **Brainstorming** | Presenta 2-3 enfoques con sus trade-offs antes de escribir código |
-| Listo para construir | **Writing Plans** | Crea un plan de implementación paso a paso para tu aprobación |
-| Construyendo | **Executing Plans** | Sigue el plan paso a paso, con seguimiento de progreso |
-| Escribiendo cualquier función o fix | **Test-Driven Development** | Escribe un test que falle *primero*, luego la implementación |
-| Encontrando un bug | **Systematic Debugging** | Formula hipótesis, las prueba metódicamente, acota la causa |
-| Terminando un bloque de trabajo | **Code Review** | Revisa contra el plan y los estándares del proyecto |
-| A punto de decir "listo" | **Verification** | Ejecuta comprobaciones finales antes de declarar la tarea completa |
-| Con tareas independientes | **Parallel Agents** | Despacha múltiples agentes simultáneamente |
-| Empezando trabajo de feature | **Git Worktrees** | Aísla el trabajo en una rama de worktree dedicada |
-| Completando una rama | **Finishing a Branch** | Finalización limpia de rama y preparación del PR |
+| Cuando estás...                     | Superpowers activa...       | Lo que significa que Claude...                                     |
+|-------------------------------------|-----------------------------|--------------------------------------------------------------------|
+| Empezando algo nuevo                | **Brainstorming**           | Presenta 2-3 enfoques con sus trade-offs antes de escribir código  |
+| Listo para construir                | **Writing Plans**           | Crea un plan de implementación paso a paso para tu aprobación      |
+| Construyendo                        | **Executing Plans**         | Sigue el plan paso a paso, con seguimiento de progreso             |
+| Escribiendo cualquier función o fix | **Test-Driven Development** | Escribe un test que falle *primero*, luego la implementación       |
+| Encontrando un bug                  | **Systematic Debugging**    | Formula hipótesis, las prueba metódicamente, acota la causa        |
+| Terminando un bloque de trabajo     | **Code Review**             | Revisa contra el plan y los estándares del proyecto                |
+| A punto de decir "listo"            | **Verification**            | Ejecuta comprobaciones finales antes de declarar la tarea completa |
+| Con tareas independientes           | **Parallel Agents**         | Despacha múltiples agentes simultáneamente                         |
+| Empezando trabajo de feature        | **Git Worktrees**           | Aísla el trabajo en una rama de worktree dedicada                  |
+| Completando una rama                | **Finishing a Branch**      | Finalización limpia de rama y preparación del PR                   |
 
 ### Por qué esto es enormemente útil
 
@@ -435,12 +435,12 @@ Serena cambia esto. Es un servidor MCP que entiende tu código como **símbolos*
 
 ### Cómo se siente la diferencia
 
-| La forma antigua | Con Serena |
-|----------------|------------|
-| `grep -r "class UserService"` por todo el proyecto | `find_symbol("UserService")` — va directo allí |
-| Leer el archivo entero para entender su estructura | `get_symbols_overview("user-service.ts")` — solo el esquema |
-| Buscar y reemplazar para renombrar algo | `rename_symbol("oldName", "newName")` — seguro y semántico |
-| Buscar manualmente "¿quién llama esto?" | `find_referencing_symbols("UserService")` — respuesta completa |
+| La forma antigua                                   | Con Serena                                                     |
+|----------------------------------------------------|----------------------------------------------------------------|
+| `grep -r "class UserService"` por todo el proyecto | `find_symbol("UserService")` — va directo allí                 |
+| Leer el archivo entero para entender su estructura | `get_symbols_overview("user-service.ts")` — solo el esquema    |
+| Buscar y reemplazar para renombrar algo            | `rename_symbol("oldName", "newName")` — seguro y semántico     |
+| Buscar manualmente "¿quién llama esto?"            | `find_referencing_symbols("UserService")` — respuesta completa |
 
 El ahorro de tokens por sí solo es significativo. Pero la verdadera ganancia es la precisión — Serena encuentra la *definición*, no solo coincidencias de texto.
 
@@ -502,7 +502,7 @@ Ripgrep (`rg`) es una herramienta de búsqueda de texto rápida, y Claude Code l
 
 ### Configuración rápida
 
-```json
+```jsonc
 // ~/.claude/settings.json
 {
   "env": {
@@ -521,13 +521,13 @@ sudo apt install ripgrep    # Ubuntu/Debian
 
 Estas dos herramientas se complementan perfectamente, y enseñarle a Claude cuándo usar cada una es una de las cosas de mayor valor que puedes hacer (más sobre esto en la [Sección 7](#7-enseñar-a-claude-cuándo-usar-qué)):
 
-| Usa Ripgrep cuando necesitas | Usa Serena cuando necesitas |
-|-----------------------------|----------------------------|
-| Literales de cadena, mensajes de error | Definiciones de funciones/clases |
-| Valores de configuración en muchos archivos | ¿Quién referencia este símbolo? |
-| Archivos no-código (docs, JSON, YAML) | El cuerpo de un método específico |
-| Patrones regex en cualquier lugar | Renombrado seguro de símbolos |
-| "Encuentra cada archivo que mencione X" | "¿Cómo es la API de este archivo?" |
+| Usa Ripgrep cuando necesitas                | Usa Serena cuando necesitas        |
+|---------------------------------------------|------------------------------------|
+| Literales de cadena, mensajes de error      | Definiciones de funciones/clases   |
+| Valores de configuración en muchos archivos | ¿Quién referencia este símbolo?    |
+| Archivos no-código (docs, JSON, YAML)       | El cuerpo de un método específico  |
+| Patrones regex en cualquier lugar           | Renombrado seguro de símbolos      |
+| "Encuentra cada archivo que mencione X"     | "¿Cómo es la API de este archivo?" |
 
 Ninguna herramienta sustituye a la otra. Juntas, cubren todo.
 
@@ -543,24 +543,24 @@ Claude tiene muchas herramientas disponibles — Serena, Ripgrep, Glob, Context7
 
 Añade esto a tu CLAUDE.md global. En serio, simplemente pégala:
 
-| Tarea | Mejor Herramienta | Por Qué |
-|-------|------------------|---------|
-| Encontrar un símbolo/clase/función | Serena `find_symbol` | Semántica, consciente del lenguaje |
-| Entender la estructura de un archivo | Serena `get_symbols_overview` | Eficiente en tokens — solo el esquema |
-| Comprobar referencias antes de cambiar algo | Serena `find_referencing_symbols` | Completa — detecta cada uso |
-| Leer un archivo conocido | `Read` | Directa, sin sobrecarga — usa Serena solo cuando necesites la estructura |
-| Buscar literales de cadena, valores de config, mensajes de error | `Grep` (ripgrep) | Patrones de texto que no son símbolos de código |
-| Buscar archivos no-código (markdown, JSON, YAML) | `Grep` (ripgrep) | Serena solo indexa código |
-| Encontrar archivos por nombre o patrón | `Glob` | Más rápido que cualquier búsqueda para descubrir archivos |
-| Reemplazar el cuerpo de una función/método | Serena `replace_symbol_body` | Reemplazo preciso a nivel de símbolo |
-| Corrección puntual de código (ajuste a nivel de línea) | `Edit` | Más rápido que Serena para cambios quirúrgicos |
-| Editar configuración o archivos no-código | `Edit` | Serena no maneja archivos no-código |
-| Errores de tipos y diagnósticos | TypeScript LSP / Swift LSP | Verificación de tipos en tiempo real sin compilación completa |
-| Renombrar en todo el codebase | Serena `rename_symbol` | Renombrado semántico, no sustitución de texto |
-| Consultar la API actual de una librería | Context7 | Documentación en tiempo real — los datos de entrenamiento pueden estar desactualizados |
-| Ejecutar compilación, tests, lint | `Bash` | Comandos de verificación y scripts |
-| Recordar una decisión o patrón pasado | Graphiti `search_memory_facts` | Grafo de conocimiento multi-sesión |
-| Datos rápidos del proyecto (IDs, claves, estado) | MEMORY.md | Ya está en contexto — no hace falta llamar a ninguna herramienta |
+| Tarea                                                            | Mejor Herramienta                 | Por Qué                                                                                |
+|------------------------------------------------------------------|-----------------------------------|----------------------------------------------------------------------------------------|
+| Encontrar un símbolo/clase/función                               | Serena `find_symbol`              | Semántica, consciente del lenguaje                                                     |
+| Entender la estructura de un archivo                             | Serena `get_symbols_overview`     | Eficiente en tokens — solo el esquema                                                  |
+| Comprobar referencias antes de cambiar algo                      | Serena `find_referencing_symbols` | Completa — detecta cada uso                                                            |
+| Leer un archivo conocido                                         | `Read`                            | Directa, sin sobrecarga — usa Serena solo cuando necesites la estructura               |
+| Buscar literales de cadena, valores de config, mensajes de error | `Grep` (ripgrep)                  | Patrones de texto que no son símbolos de código                                        |
+| Buscar archivos no-código (markdown, JSON, YAML)                 | `Grep` (ripgrep)                  | Serena solo indexa código                                                              |
+| Encontrar archivos por nombre o patrón                           | `Glob`                            | Más rápido que cualquier búsqueda para descubrir archivos                              |
+| Reemplazar el cuerpo de una función/método                       | Serena `replace_symbol_body`      | Reemplazo preciso a nivel de símbolo                                                   |
+| Corrección puntual de código (ajuste a nivel de línea)           | `Edit`                            | Más rápido que Serena para cambios quirúrgicos                                         |
+| Editar configuración o archivos no-código                        | `Edit`                            | Serena no maneja archivos no-código                                                    |
+| Errores de tipos y diagnósticos                                  | TypeScript LSP / Swift LSP        | Verificación de tipos en tiempo real sin compilación completa                          |
+| Renombrar en todo el codebase                                    | Serena `rename_symbol`            | Renombrado semántico, no sustitución de texto                                          |
+| Consultar la API actual de una librería                          | Context7                          | Documentación en tiempo real — los datos de entrenamiento pueden estar desactualizados |
+| Ejecutar compilación, tests, lint                                | `Bash`                            | Comandos de verificación y scripts                                                     |
+| Recordar una decisión o patrón pasado                            | Graphiti `search_memory_facts`    | Grafo de conocimiento multi-sesión                                                     |
+| Datos rápidos del proyecto (IDs, claves, estado)                 | MEMORY.md                         | Ya está en contexto — no hace falta llamar a ninguna herramienta                       |
 
 **La regla general:** Serena para símbolos de código. Grep para texto y no-código. Glob para archivos. Context7 para documentación. Graphiti para memoria. LSP para verificación de tipos. Read/Edit para trabajo directo con archivos.
 
@@ -639,14 +639,14 @@ Claude Code tiene múltiples sistemas de memoria, y cada uno hace algo diferente
 
 ### La hoja de referencia rápida
 
-| Qué Estás Almacenando | Dónde Va | Por Qué Ahí |
-|----------------------|---------|-------------|
-| Instrucciones y reglas persistentes | **CLAUDE.md** | Siempre cargado, siempre seguido — tú lo escribes |
-| Datos de referencia rápida (IDs, nombres, flags de estado) | **MEMORY.md** | Se carga automáticamente por proyecto, escaneable |
-| Patrones que Claude descubre mientras trabaja | **Auto Memory** | Claude los escribe él mismo mientras trabaja |
-| Decisiones con contexto rico (el *por qué*) | **Graphiti** | Buscable, con marcas de tiempo, relacional |
-| Progreso de tarea actual | **Tasks** | Sobrevive a la compactación de contexto |
-| Conocimiento profundo por tema | **Skills** | Se carga bajo demanda, no siempre |
+| Qué Estás Almacenando                                      | Dónde Va        | Por Qué Ahí                                       |
+|------------------------------------------------------------|-----------------|---------------------------------------------------|
+| Instrucciones y reglas persistentes                        | **CLAUDE.md**   | Siempre cargado, siempre seguido — tú lo escribes |
+| Datos de referencia rápida (IDs, nombres, flags de estado) | **MEMORY.md**   | Se carga automáticamente por proyecto, escaneable |
+| Patrones que Claude descubre mientras trabaja              | **Auto Memory** | Claude los escribe él mismo mientras trabaja      |
+| Decisiones con contexto rico (el *por qué*)                | **Graphiti**    | Buscable, con marcas de tiempo, relacional        |
+| Progreso de tarea actual                                   | **Tasks**       | Sobrevive a la compactación de contexto           |
+| Conocimiento profundo por tema                             | **Skills**      | Se carga bajo demanda, no siempre                 |
 
 ### Auto Memory — Claude enseñándose a sí mismo
 
@@ -721,7 +721,7 @@ Los hooks sirven para dos propósitos: **automatización** (para que no olvides 
 
 Configura un hook que se ejecute al inicio de cada sesión:
 
-```json
+```jsonc
 // ~/.claude/settings.json
 {
   "hooks": {
@@ -786,11 +786,11 @@ Un stop hook se ejecuta cuando Claude está a punto de terminar. Úsalo para cap
 
 Los hooks vienen en tres sabores, cada uno para un nivel diferente de verificación:
 
-| Tipo | Qué Hace | Ideal Para |
-|------|---------|-----------|
-| `command` | Ejecuta un shell script, comprueba el código de salida | Linting, formatting, notificaciones |
-| `prompt` | Envía un prompt a un modelo Claude para evaluación de un solo turno | Revisión ligera, comprobaciones de seguridad |
-| `agent` | Lanza un subagente con acceso completo a herramientas (hasta 50 turnos) | Verificación profunda, comprobaciones en múltiples archivos |
+| Tipo      | Qué Hace                                                                | Ideal Para                                                  |
+|-----------|-------------------------------------------------------------------------|-------------------------------------------------------------|
+| `command` | Ejecuta un shell script, comprueba el código de salida                  | Linting, formatting, notificaciones                         |
+| `prompt`  | Envía un prompt a un modelo Claude para evaluación de un solo turno     | Revisión ligera, comprobaciones de seguridad                |
+| `agent`   | Lanza un subagente con acceso completo a herramientas (hasta 50 turnos) | Verificación profunda, comprobaciones en múltiples archivos |
 
 Un hook `prompt` es perfecto para comprobaciones de "¿es seguro este código?" sin la sobrecarga de un subagente completo. Un hook `agent` puede leer archivos, ejecutar búsquedas y verificar condiciones en todo el codebase antes de permitir que una llamada de herramienta pase.
 
@@ -845,7 +845,7 @@ El sistema de permisos de Claude Code controla lo que Claude puede hacer sin ped
 
 ### Los tres niveles
 
-```json
+```jsonc
 {
   "permissions": {
     "allow": [
@@ -922,12 +922,12 @@ La forma más efectiva de usar Claude Code es pensar en tu sesión principal com
 
 Esto no es solo un buen modelo mental — es cómo están estructuradas las mejores configuraciones:
 
-| Rol | Modelo | Cuándo Usarlo |
-|-----|-------|--------------|
-| **Orquestador** (sesión principal) | `opus` | Siempre — planificación, revisión, validación, coordinación |
-| **Agente de implementación** | `sonnet` | Escribir código, tests, refactorizaciones estándar |
-| **Agente de exploración** | `haiku` | Búsqueda amplia del codebase, consultas rápidas, descubrimiento de archivos |
-| **Subagente crítico** | `opus` | Cuando la complejidad o el impacto exigen hacerlo bien |
+| Rol                                | Modelo   | Cuándo Usarlo                                                               |
+|------------------------------------|----------|-----------------------------------------------------------------------------|
+| **Orquestador** (sesión principal) | `opus`   | Siempre — planificación, revisión, validación, coordinación                 |
+| **Agente de implementación**       | `sonnet` | Escribir código, tests, refactorizaciones estándar                          |
+| **Agente de exploración**          | `haiku`  | Búsqueda amplia del codebase, consultas rápidas, descubrimiento de archivos |
+| **Subagente crítico**              | `opus`   | Cuando la complejidad o el impacto exigen hacerlo bien                      |
 
 Añade esto a tu CLAUDE.md global:
 
@@ -1015,25 +1015,25 @@ Esto tiene una consecuencia práctica directa: **compact y continuar es casi sie
 
 ### Los comandos clave
 
-| Comando | Qué Hace | Cuándo Usarlo |
-|---------|---------|--------------|
-| `/compact` | Comprime el historial de conversación preservando contexto clave | Cuando la sesión se siente lenta o estás cambiando de subtarea |
-| `/compact Focus on the API changes` | Compresión guiada — le dice a Claude qué preservar | Cuando quieres que contexto específico sobreviva |
-| `/clear` | Borra completamente el historial de conversación | Entre tareas no relacionadas — el comando más infrautilizado |
-| `/btw` | Haz una pregunta lateral que no entra en el historial | Consultas rápidas que no deberían crecer el contexto |
-| `/context` | Muestra el desglose de tokens por categoría | Diagnosticar qué está consumiendo tu contexto |
-| `Ctrl+B` | Pone en segundo plano un subagente en ejecución | Cuando un subagente tarda mucho y quieres hacer otra cosa |
+| Comando                             | Qué Hace                                                         | Cuándo Usarlo                                                  |
+|-------------------------------------|------------------------------------------------------------------|----------------------------------------------------------------|
+| `/compact`                          | Comprime el historial de conversación preservando contexto clave | Cuando la sesión se siente lenta o estás cambiando de subtarea |
+| `/compact Focus on the API changes` | Compresión guiada — le dice a Claude qué preservar               | Cuando quieres que contexto específico sobreviva               |
+| `/clear`                            | Borra completamente el historial de conversación                 | Entre tareas no relacionadas — el comando más infrautilizado   |
+| `/btw`                              | Haz una pregunta lateral que no entra en el historial            | Consultas rápidas que no deberían crecer el contexto           |
+| `/context`                          | Muestra el desglose de tokens por categoría                      | Diagnosticar qué está consumiendo tu contexto                  |
+| `Ctrl+B`                            | Pone en segundo plano un subagente en ejecución                  | Cuando un subagente tarda mucho y quieres hacer otra cosa      |
 
 ### Compact vs clear vs nueva sesión
 
 Esta es una decisión que tomarás decenas de veces. Esta es la regla:
 
-| Situación | Mejor acción | Por qué |
-|-----------|-------------|---------|
-| Cambiando a trabajo **no relacionado** | `/clear` | El contexto antiguo es ruido puro para la nueva tarea |
-| Continuando trabajo **similar** después de terminar una parte | `/compact` | Conserva las decisiones, elimina las salidas de herramientas |
-| La sesión se siente lenta o Claude olvida instrucciones | `/compact` con guía | Resetea el ruido conservando lo que importa |
-| Empezando un **proyecto completamente diferente** | Nueva sesión | Diferente CLAUDE.md, diferente proyecto Serena, todo diferente |
+| Situación                                                     | Mejor acción        | Por qué                                                        |
+|---------------------------------------------------------------|---------------------|----------------------------------------------------------------|
+| Cambiando a trabajo **no relacionado**                        | `/clear`            | El contexto antiguo es ruido puro para la nueva tarea          |
+| Continuando trabajo **similar** después de terminar una parte | `/compact`          | Conserva las decisiones, elimina las salidas de herramientas   |
+| La sesión se siente lenta o Claude olvida instrucciones       | `/compact` con guía | Resetea el ruido conservando lo que importa                    |
+| Empezando un **proyecto completamente diferente**             | Nueva sesión        | Diferente CLAUDE.md, diferente proyecto Serena, todo diferente |
 
 La clave: **`/compact` + continuar supera a una nueva sesión** cuando el trabajo está relacionado. Una sesión compactada retiene tus decisiones arquitectónicas, patrones acordados y progreso de tareas. Una sesión nueva empieza en frío y tiene que redescubrir todo eso.
 
@@ -1214,13 +1214,13 @@ Las sesiones en Claude Code no son desechables — puedes reanudarlas, nombrarla
 
 ### Comandos clave
 
-| Comando | Qué Hace |
-|---------|---------|
-| `claude --continue` | Reanuda la sesión más reciente |
-| `claude --resume` | Abre un selector de sesiones para elegir cuál reanudar |
+| Comando                   | Qué Hace                                                      |
+|---------------------------|---------------------------------------------------------------|
+| `claude --continue`       | Reanuda la sesión más reciente                                |
+| `claude --resume`         | Abre un selector de sesiones para elegir cuál reanudar        |
 | `claude -n auth-refactor` | Inicia una sesión con nombre (más fácil de encontrar después) |
-| `/rename auth-refactor` | Renombra la sesión actual |
-| `claude --from-pr 123` | Reanuda una sesión vinculada a un PR específico |
+| `/rename auth-refactor`   | Renombra la sesión actual                                     |
+| `claude --from-pr 123`    | Reanuda una sesión vinculada a un PR específico               |
 
 ### Atajos del selector de sesiones
 
