@@ -1,0 +1,23 @@
+title: Claude Code Best Practices
+description: A practical guide to getting the most out of Claude Code — from initial setup to advanced workflows.
+remote_theme: pages-themes/cayman@v0.2.0
+plugins:
+  - jekyll-remote-theme
+
+# GitHub Pages settings
+baseurl: "/cc-best-practices"
+url: "https://eligoss.github.io"
+
+# Markdown rendering
+markdown: kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
+  syntax_highlighter: rouge
+
+# Exclude files from build
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - LICENSE
+  - .gitignore
