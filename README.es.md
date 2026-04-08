@@ -183,24 +183,37 @@ Es un punto de partida sólido. Luego refínalo con el tiempo usando `/revise-cl
 
 ### Reglas por ruta: carga el contexto correcto para los archivos correctos
 
-> *Todavía no lo he usado yo mismo, pero es demasiado útil para no recomendarlo.*
+En lugar de cargar todas tus reglas todo el tiempo, puedes aplicar reglas a patrones de archivos específicos usando `.claude/rules/`. Esto funciona tanto globalmente (`~/.claude/rules/`) como por proyecto (`.claude/rules/`).
 
-En lugar de cargar todas tus reglas todo el tiempo, puedes aplicar reglas a patrones de archivos específicos usando `.claude/rules/`:
+Las reglas vienen en dos variantes: **incondicionales** (sin `paths:` — siempre se cargan junto con CLAUDE.md) y **acotadas por ruta** (solo se cargan cuando Claude trabaja en archivos que coinciden):
 
 ```yaml
-# .claude/rules/api-conventions.md
+# ~/.claude/rules/git.md — incondicional, se carga en cada sesión
 ---
-paths:
-  - "src/api/**/*.ts"
+description: Git commit format and push rules
 ---
 
-## API Design Rules
-- All endpoints return { data, error, meta }
-- Use Zod for request validation
-- Rate limit: 100 req/min per user
+# Git Rules
+## Commit Format
+`<type>(<scope>): <description>` — 100 char max subject.
+...
 ```
 
-Este archivo solo se carga cuando Claude trabaja con archivos que coinciden con `src/api/**/*.ts`. Tus convenciones de tests solo se cargan cuando editas tests. Tus patrones de frontend solo se cargan cuando tocas componentes. La misma idea que los skills (Sección 3), pero activado por ruta en lugar de por tarea.
+```yaml
+# ~/.claude/rules/typescript.md — solo se carga para archivos TS/TSX
+---
+description: TypeScript coding rules
+paths:
+  - "**/*.ts"
+  - "**/*.tsx"
+---
+
+# TypeScript Rules
+- Enable `strict: true` in tsconfig.json.
+- No `any` types. Use `unknown` for external data...
+```
+
+Este es el lugar adecuado para reglas de lenguaje (TypeScript, Swift), reglas de flujo de trabajo (bucle de CodeRabbit, convenciones de git), higiene del contexto y estándares de calidad de código. Cada una se carga solo cuando es relevante — arreglar un bug de CSS no cargará tus reglas de strict-mode de TypeScript. La misma idea que los skills (Sección 3), pero activado por ruta en lugar de por tarea.
 
 ### No lo escribas solo
 
@@ -588,18 +601,23 @@ Graphiti es diferente. Es un **grafo de conocimiento** en el que Claude escribe 
 
 ### Qué va en Graphiti (y qué no)
 
-Piensa en Graphiti como el lugar para **decisiones con contexto** — las cosas que son demasiado detalladas o demasiado fluidas para CLAUDE.md:
+Piensa en Graphiti como el lugar para el **conocimiento duradero** — cualquier cosa que una sesión futura necesitaría para entender el proyecto en profundidad, que no sea obvia con solo leer el código:
 
 **Sí:**
-- "Elegimos event sourcing para orders porque necesitamos un audit trail. El trade-off son lecturas más complejas vía projections."
+- Visión, objetivos y dirección del producto — qué estás construyendo y por qué
+- Entidades clave y cómo se usan — conceptos del modelo de datos, relaciones entre sistemas
+- Decisiones de diseño arquitectónico — patrones elegidos, estructura, elecciones tecnológicas + razonamiento
+- Intención de diseño de UI/layout — flujos de pantallas, filosofía de componentes, decisiones visuales
+- Causas raíz de bugs y correcciones no obvias — las que tardaste una hora en encontrar
+- Trade-offs considerados y alternativas rechazadas — para que sesiones futuras no vuelvan a debatir decisiones ya tomadas
 - "La reescritura del middleware de auth está motivada por cumplimiento legal, no deuda técnica — las decisiones de alcance deben favorecer el cumplimiento sobre la ergonomía."
-- "React Query v5 requiere envolver las mutations en startTransition — descubierto durante la actualización."
 
 **No:**
 - Cambios de código rutinarios (para eso está el git log)
 - Secretos o credenciales (nunca)
 - Volcados verbosos de código (guárdalos en el código, no en la memoria)
 - Cualquier cosa que ya esté en CLAUDE.md (no dupliques)
+- Estado efímero específico de la sesión
 
 ### Cómo funciona en la práctica
 
@@ -614,7 +632,7 @@ When using Graphiti tools, always use `group_id="my-project"`.
 
 ```text
 search_memory_facts(
-  query="architecture decisions patterns",
+  query="project vision goals entities architecture design decisions patterns",
   group_ids=["my-project"]
 )
 ```
@@ -644,7 +662,7 @@ Claude Code tiene múltiples sistemas de memoria, y cada uno hace algo diferente
 | Instrucciones y reglas persistentes                        | **CLAUDE.md**   | Siempre cargado, siempre seguido — tú lo escribes |
 | Datos de referencia rápida (IDs, nombres, flags de estado) | **MEMORY.md**   | Se carga automáticamente por proyecto, escaneable |
 | Patrones que Claude descubre mientras trabaja              | **Auto Memory** | Claude los escribe él mismo mientras trabaja      |
-| Decisiones con contexto rico (el *por qué*)                | **Graphiti**    | Buscable, con marcas de tiempo, relacional        |
+| Visión, entidades, diseño, decisiones, causas de bugs      | **Graphiti**    | Buscable, con marcas de tiempo, relacional        |
 | Progreso de tarea actual                                   | **Tasks**       | Sobrevive a la compactación de contexto           |
 | Conocimiento profundo por tema                             | **Skills**      | Se carga bajo demanda, no siempre                 |
 
@@ -740,7 +758,7 @@ Configura un hook que se ejecute al inicio de cada sesión:
 }
 ```
 
-El script del hook lee el CLAUDE.md de tu proyecto, extrae el `group_id` de Graphiti y el nombre del proyecto en Serena, e inyecta recordatorios:
+El script del hook lee el CLAUDE.md de tu proyecto, extrae el `group_id` de Graphiti y el nombre del proyecto en Serena, e inyecta recordatorios de "Acción requerida" en el contexto de Claude:
 
 ```bash
 #!/bin/bash
@@ -753,30 +771,71 @@ SERENA_NAME=""
 
 if [ -f "$CWD/CLAUDE.md" ]; then
   GROUP_ID=$(sed -n 's/.*group_id="\([^"]*\)".*/\1/p' "$CWD/CLAUDE.md" | head -1)
-  SERENA_NAME=$(sed -n 's/.*activate_project("\([^"]*\)".*/\1/p' "$CWD/CLAUDE.md" | head -1)
+  # Coincide con activate_project("name") usando caracteres de identificador acotados
+  SERENA_NAME=$(
+    sed -n \
+      -e 's/.*activate_project("\([A-Za-z0-9._-]\+\)").*/\1/p' \
+      "$CWD/CLAUDE.md" | head -1
+  )
 fi
 
-MSGS="Action required: Read ~/.claude/CLAUDE.md for global instructions.\n"
-[ -n "$SERENA_NAME" ] && MSGS="${MSGS}Action required: activate_project(\"$SERENA_NAME\")\n"
-[ -n "$GROUP_ID" ] && MSGS="${MSGS}Action required: search Graphiti with group_id=$GROUP_ID\n"
+MSGS="Action required: Read ~/.claude/CLAUDE.md for global instructions before starting work.\n"
+[ -n "$GROUP_ID" ] && MSGS="${MSGS}Action required: Call search_memory_facts(query=\"project vision goals entities architecture design decisions patterns\", group_ids=[\"$GROUP_ID\"]) to load Graphiti memory. Do this BEFORE responding.\n"
+[ -n "$SERENA_NAME" ] && MSGS="${MSGS}Action required: Call activate_project(\"$SERENA_NAME\") to enable Serena code navigation.\n"
+[ -z "$GROUP_ID" ] && MSGS="${MSGS}Note: No Graphiti group_id found in project CLAUDE.md.\n"
+MSGS="${MSGS}Note: MEMORY.md is auto-loaded — scan it for quick facts before proceeding.\n"
+
 echo -e "$MSGS"
 ```
 
-Ahora cada sesión empieza completamente cargada — sin recordatorios manuales.
+Nótese el orden: Graphiti se ejecuta antes de la activación de Serena, coincidiendo con la secuencia requerida al inicio de sesión.
 
-### Fin de sesión: guarda lo que aprendiste
+> **Consejo — inyección de identidad:** Si usas un archivo `IDENTITY.md` o `SOUL.md` para la personalidad y el estilo de trabajo de Claude, inyéctalo aquí también mediante un recordatorio "Action required: Read". Los hooks de sesión solo se disparan en sesiones interactivas — los subagentes lanzados con la herramienta Agent no los ejecutan, de modo que el contexto de personalidad se mantiene fuera de los agentes de tarea específica donde solo desperdiciaría tokens.
 
-Un stop hook se ejecuta cuando Claude está a punto de terminar. Úsalo para capturar conocimiento no guardado:
+### Entre ediciones: fomentar la verificación
+
+Un hook PostToolUse se dispara después de cada escritura de archivo. Úsalo para recordarle a Claude que haga lint y type-check sin bloquearlo:
 
 ```json
 {
-  "stopHooks": [
-    {
-      "type": "prompt",
-      "prompt": "Before stopping, check if any architectural decisions or bug root causes were discovered. If so, save to Graphiti. Check if MEMORY.md needs new identifiers or status updates.",
-      "model": "haiku"
-    }
-  ]
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "You just edited or wrote a file. If this completes a logical unit of work (not mid-edit in a series of changes), run the appropriate linter and type-checker for this project now. Use the commands from the project CLAUDE.md. Skip if you are mid-task and plan to make more changes immediately.",
+            "model": "haiku"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Esto anima a Claude a verificar de forma incremental en lugar de acumular errores a lo largo de muchos archivos.
+
+### Fin de sesión: guarda lo que aprendiste
+
+Un hook Stop se ejecuta cuando Claude está a punto de terminar. Úsalo para tres comprobaciones:
+
+```json
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Before stopping, do all three: (1) If code was modified, run type-check and lint — report results. (2) If non-obvious decisions, architecture choices, or design rationale were established, save them to Graphiti using add_memory with the project group_id. Skip routine edits. (3) If any stable facts (IDs, status flags, confirmed patterns) changed, update MEMORY.md.",
+            "model": "haiku"
+          }
+        ]
+      }
+    ]
+  }
 }
 ```
 
@@ -1152,7 +1211,7 @@ Define tu formato una vez en el CLAUDE.md global y nunca más vuelvas a pensar e
 
 ```markdown
 ## Git
-Commits: <type>(<scope>): <description> (50 char max subject)
+Commits: <type>(<scope>): <description> (100 char max subject)
 Body: blank line + bullet list, 72 char wrap
 Types: feat fix docs style refactor perf test build ci chore revert
 Rules: Never commit to main. Never force push. Never skip hooks.
@@ -1175,12 +1234,15 @@ claude plugin install coderabbit@claude-plugins-official
 /coderabbit:review    — Ejecutar revisión CodeRabbit en los cambios actuales
 ```
 
-**Flujo de trabajo para las revisiones de CodeRabbit:**
-1. Aborda todos los comentarios — incluyendo las sugerencias "nice to have"
-2. Resuelve cada hilo de revisión después de arreglarlo
-3. Publica `@coderabbitai resolve` para limpiar los comentarios pendientes
-4. Publica `@coderabbitai full review` para una nueva pasada
-5. CodeRabbit cambia a APPROVED cuando todos los hilos están limpios
+**Bucle autónomo de CodeRabbit** — ejecuta esto después de cada push a un PR, sin esperar a que te lo pidan:
+1. Espera 2–3 minutos, luego obtén todos los comentarios inline de `coderabbitai[bot]`
+2. Arregla cada comentario en un solo paso — no hagas cherry-pick
+3. Haz commit y push
+4. Espera 2–3 minutos, vuelve a comprobar; repite hasta que no haya nuevos comentarios en el último push
+5. Espera hasta 5 minutos para que CodeRabbit cambie a `APPROVED`
+6. Publica `@coderabbitai resolve` para colapsar los hilos resueltos
+
+Si los comentarios persisten tras 3 iteraciones completas, detente e informa al usuario. Usa `@coderabbitai full review` si la revisión incremental parece incoherente (p. ej., tras un rebase grande). Nunca descartes las revisiones vía la API de GitHub — CodeRabbit aprueba cuando está satisfecho.
 
 **2. Revisiones locales con subagentes — feedback inmediato y contextual**
 
