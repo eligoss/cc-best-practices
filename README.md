@@ -185,24 +185,37 @@ It's a solid starting point. Then refine it over time with `/revise-claude-md` (
 
 ### Path-specific rules: load the right context for the right files
 
-> *I haven't used this one yet myself, but it's too useful not to recommend.*
+Instead of loading all your rules all the time, you can scope rules to specific file patterns using `.claude/rules/`. This works both globally (`~/.claude/rules/`) and per-project (`.claude/rules/`).
 
-Instead of loading all your rules all the time, you can scope rules to specific file patterns using `.claude/rules/`:
+Rules come in two flavors: **unconditional** (no `paths:` — always loaded alongside CLAUDE.md) and **path-scoped** (only loaded when Claude works on matching files):
 
 ```yaml
-# .claude/rules/api-conventions.md
+# ~/.claude/rules/git.md — unconditional, loaded every session
 ---
-paths:
-  - "src/api/**/*.ts"
+description: Git commit format and push rules
 ---
 
-## API Design Rules
-- All endpoints return { data, error, meta }
-- Use Zod for request validation
-- Rate limit: 100 req/min per user
+# Git Rules
+## Commit Format
+`<type>(<scope>): <description>` — 100 char max subject.
+...
 ```
 
-This file only loads when Claude works with files matching `src/api/**/*.ts`. Your test conventions only load when editing tests. Your frontend patterns only load when touching components. Same idea as skills (Section 3), but file-path-triggered instead of task-triggered.
+```yaml
+# ~/.claude/rules/typescript.md — only loads for TS/TSX files
+---
+description: TypeScript coding rules
+paths:
+  - "**/*.ts"
+  - "**/*.tsx"
+---
+
+# TypeScript Rules
+- Enable `strict: true` in tsconfig.json.
+- No `any` types. Use `unknown` for external data...
+```
+
+This is the right home for language rules (TypeScript, Swift), workflow rules (CodeRabbit loop, git conventions), context hygiene, and code quality standards. Each loads only when relevant — fixing a CSS bug won't load your TypeScript strict-mode rules. Same idea as skills (Section 3), but file-path-triggered rather than task-triggered.
 
 ### Don't write it alone
 
@@ -590,18 +603,23 @@ Graphiti is different. It's a **knowledge graph** that Claude writes to during s
 
 ### What goes in Graphiti (and what doesn't)
 
-Think of Graphiti as the place for **decisions with context** — the stuff that's too detailed or too fluid for CLAUDE.md:
+Think of Graphiti as the place for **durable knowledge** — anything a future session would need to understand the project deeply, that isn't obvious from reading the code:
 
 **Yes:**
-- "We chose event sourcing for orders because we need an audit trail. The trade-off is more complex reads via projections."
+- Project vision, goals, and product direction — what you're building and why
+- Key entities and how they're used — data model concepts, relationships between systems
+- Architectural design decisions — chosen patterns, structure, technology choices + rationale
+- UI/layout design intent — screen flows, component philosophy, visual decisions
+- Bug root causes and non-obvious fixes — the kind that took an hour to find
+- Trade-offs considered and rejected alternatives — so future sessions don't re-litigate settled decisions
 - "The auth middleware rewrite is driven by legal compliance, not tech debt — scope decisions should favor compliance over ergonomics."
-- "React Query v5 requires wrapping mutations in startTransition — discovered during the upgrade."
 
 **No:**
 - Routine code changes (that's what git log is for)
 - Secrets or credentials (never)
 - Verbose code dumps (store in the code, not in memory)
 - Anything already in CLAUDE.md (don't duplicate)
+- Session-specific ephemeral state
 
 ### How it works in practice
 
@@ -616,7 +634,7 @@ When using Graphiti tools, always use `group_id="my-project"`.
 
 ```text
 search_memory_facts(
-  query="architecture decisions patterns",
+  query="project vision goals entities architecture design decisions patterns",
   group_ids=["my-project"]
 )
 ```
@@ -646,7 +664,7 @@ Claude Code has multiple memory systems, and they each do something different. U
 | Persistent instructions and rules                | **CLAUDE.md**   | Always loaded, always followed — you write it |
 | Quick-reference facts (IDs, names, status flags) | **MEMORY.md**   | Auto-loaded per project, scannable            |
 | Patterns Claude discovers while working          | **Auto Memory** | Claude writes these itself as it works        |
-| Decisions with rich context (the *why*)          | **Graphiti**    | Searchable, timestamped, relational           |
+| Vision, entities, design, decisions, bug roots   | **Graphiti**    | Searchable, timestamped, relational           |
 | Current task progress                            | **Tasks**       | Survives context compaction                   |
 | Deep topic-specific knowledge                    | **Skills**      | Loaded on demand, not always                  |
 
@@ -742,7 +760,7 @@ Set up a hook that runs at the start of every session:
 }
 ```
 
-The hook script reads your project CLAUDE.md, extracts the Graphiti `group_id` and Serena project name, and injects reminders:
+The hook script reads your project CLAUDE.md, extracts the Graphiti `group_id` and Serena project name, and injects "Action required" reminders into Claude's context:
 
 ```bash
 #!/bin/bash
@@ -755,30 +773,71 @@ SERENA_NAME=""
 
 if [ -f "$CWD/CLAUDE.md" ]; then
   GROUP_ID=$(sed -n 's/.*group_id="\([^"]*\)".*/\1/p' "$CWD/CLAUDE.md" | head -1)
-  SERENA_NAME=$(sed -n 's/.*activate_project("\([^"]*\)".*/\1/p' "$CWD/CLAUDE.md" | head -1)
+  # Match activate_project("name") with constrained identifier characters
+  SERENA_NAME=$(
+    sed -n \
+      -e 's/.*activate_project("\([A-Za-z0-9._-]\+\)").*/\1/p' \
+      "$CWD/CLAUDE.md" | head -1
+  )
 fi
 
-MSGS="Action required: Read ~/.claude/CLAUDE.md for global instructions.\n"
-[ -n "$SERENA_NAME" ] && MSGS="${MSGS}Action required: activate_project(\"$SERENA_NAME\")\n"
-[ -n "$GROUP_ID" ] && MSGS="${MSGS}Action required: search Graphiti with group_id=$GROUP_ID\n"
+MSGS="Action required: Read ~/.claude/CLAUDE.md for global instructions before starting work.\n"
+[ -n "$GROUP_ID" ] && MSGS="${MSGS}Action required: Call search_memory_facts(query=\"project vision goals entities architecture design decisions patterns\", group_ids=[\"$GROUP_ID\"]) to load Graphiti memory. Do this BEFORE responding.\n"
+[ -n "$SERENA_NAME" ] && MSGS="${MSGS}Action required: Call activate_project(\"$SERENA_NAME\") to enable Serena code navigation.\n"
+[ -z "$GROUP_ID" ] && MSGS="${MSGS}Note: No Graphiti group_id found in project CLAUDE.md.\n"
+MSGS="${MSGS}Note: MEMORY.md is auto-loaded — scan it for quick facts before proceeding.\n"
+
 echo -e "$MSGS"
 ```
 
-Now every session starts fully loaded — no manual reminders needed.
+Note the ordering: Graphiti runs before Serena activation, matching the required session-start sequence.
 
-### Session end: save what you learned
+> **Tip — identity injection:** If you use an `IDENTITY.md` or `SOUL.md` file for Claude's personality and working style, inject it here too via an "Action required: Read" reminder. Session hooks only fire for interactive sessions — sub-agents spawned with the Agent tool don't run them, so personality context stays out of focused task agents where it would just waste tokens.
 
-A stop hook runs when Claude is about to finish. Use it to catch unsaved knowledge:
+### Between edits: nudge verification
+
+A PostToolUse hook fires after each file write. Use it to remind Claude to lint and type-check without blocking:
 
 ```json
 {
-  "stopHooks": [
-    {
-      "type": "prompt",
-      "prompt": "Before stopping, check if any architectural decisions or bug root causes were discovered. If so, save to Graphiti. Check if MEMORY.md needs new identifiers or status updates.",
-      "model": "haiku"
-    }
-  ]
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "You just edited or wrote a file. If this completes a logical unit of work (not mid-edit in a series of changes), run the appropriate linter and type-checker for this project now. Use the commands from the project CLAUDE.md. Skip if you are mid-task and plan to make more changes immediately.",
+            "model": "haiku"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+This nudges Claude to verify incrementally rather than accumulating errors across many files.
+
+### Session end: save what you learned
+
+A Stop hook runs when Claude is about to finish. Use it for three checks:
+
+```json
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Before stopping, do all three: (1) If code was modified, run type-check and lint — report results. (2) If non-obvious decisions, architecture choices, or design rationale were established, save them to Graphiti using add_memory with the project group_id. Skip routine edits. (3) If any stable facts (IDs, status flags, confirmed patterns) changed, update MEMORY.md.",
+            "model": "haiku"
+          }
+        ]
+      }
+    ]
+  }
 }
 ```
 
@@ -1154,7 +1213,7 @@ Define your format once in global CLAUDE.md and never think about it again:
 
 ```markdown
 ## Git
-Commits: <type>(<scope>): <description> (50 char max subject)
+Commits: <type>(<scope>): <description> (100 char max subject)
 Body: blank line + bullet list, 72 char wrap
 Types: feat fix docs style refactor perf test build ci chore revert
 Rules: Never commit to main. Never force push. Never skip hooks.
@@ -1177,12 +1236,15 @@ claude plugin install coderabbit@claude-plugins-official
 /coderabbit:review    — Run CodeRabbit review on current changes
 ```
 
-**Workflow for CodeRabbit reviews:**
-1. Address all comments — including "nice to have" suggestions
-2. Resolve each review thread after fixing
-3. Post `@coderabbitai resolve` to clear outstanding comments
-4. Post `@coderabbitai full review` for a fresh pass
-5. CodeRabbit flips to APPROVED when all threads are clean
+**Autonomous CodeRabbit loop** — run this after every PR push, without waiting to be asked:
+1. Wait 2–3 minutes, then fetch all `coderabbitai[bot]` inline comments
+2. Fix every comment in one pass — do not cherry-pick
+3. Commit and push
+4. Wait 2–3 minutes, re-check; repeat until no new comments on the latest push
+5. Wait up to 5 minutes for CodeRabbit to flip to `APPROVED`
+6. Post `@coderabbitai resolve` to collapse resolved threads
+
+If comments persist after 3 full iterations, stop and report to the user. Use `@coderabbitai full review` if the incremental review seems incoherent (e.g., after a large rebase). Never dismiss reviews via the GitHub API — CodeRabbit approves when it's satisfied.
 
 **2. Local subagent reviews — immediate, contextual feedback**
 
